@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Intelligence • Creator Tools Suite</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
+    </script>
+    <style>
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #111827;
+            --bg-card: #1a1f2e;
+            --bg-card-hover: #64748b;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-1: #6366f1;
+            --accent-2: #8b5cf6;
+            --accent-3: #a855f7;
+            --accent-4: #06b6d4;
+            --accent-5: #10b981;
+            --accent-warn: #f59e0b;
+            --accent-danger: #ef4444;
+            --border-color: #1e293b;
+            --border-light: #2a3347;
+            --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
+            --radius-sm: 10px;
+            --radius: 14px;
+            --radius-lg: 20px;
+            --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --sidebar-width: 260px;
+        }
+
+        [data-bs-theme="light"] {
+            --bg-primary: #f1f5f9;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --bg-card-hover: #f8fafc;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --border-color: #e2e8f0;
+            --border-light: #e8ecf1;
+            --shadow-card: 0 2px 16px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            margin: 0;
+            min-height: 100vh;
+            transition: background var(--transition), color var(--transition);
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-light);
+            border-radius: 20px;
+        }
+
+        .glass-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-card);
+            transition: all var(--transition);
+        }
+        .glass-card:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-light);
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 20px 22px;
+            text-align: center;
+            transition: all var(--transition);
+        }
+        .stat-card:hover {
+            border-color: var(--accent-1);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+        }
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-4));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            transition: all var(--transition);
+            overflow-y: auto;
+        }
+        .sidebar-logo {
+            padding: 20px 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+        .sidebar-logo .logo-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-3));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #fff;
+        }
+        .sidebar-nav .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 16px;
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition);
+            font-weight: 500;
+            font-size: 0.9rem;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+        .sidebar-nav .nav-item:hover {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+        .sidebar-nav .nav-item.active {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(139, 92, 246, 0.2));
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 24px 30px;
+            min-height: 100vh;
+            transition: margin var(--transition);
+        }
+        .section-panel {
+            display: none;
+            animation: fadeSlideIn 0.35s ease;
+        }
+        .section-panel.active {
+            display: block;
+        }
+        @keyframes fadeSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .btn-glow {
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+            color: #fff;
+            border: none;
+            padding: 11px 22px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+        }
+        .btn-glow:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(99, 102, 241, 0.5);
+        }
+
+        .form-control-custom {
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            padding: 12px 16px;
+            font-size: 0.95rem;
+            transition: all var(--transition);
+            width: 100%;
+        }
+        .form-control-custom:focus {
+            outline: none;
+            border-color: var(--accent-1);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+        }
+
+        .video-result-card {
+            display: flex;
+            gap: 14px;
+            padding: 14px;
+            border-radius: var(--radius-sm);
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            transition: all var(--transition);
+            cursor: pointer;
+            align-items: flex-start;
+        }
+        .video-result-card:hover {
+            border-color: var(--accent-1);
+            box-shadow: 0 0 16px rgba(99, 102, 241, 0.25);
+        }
+        .video-result-card img {
+            width: 140px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            flex-shrink: 0;
+            background: #1a1a2e;
+        }
+        .tag-pill {
+            display: inline-block;
+            background: var(--bg-card-hover);
+            border: 1px solid var(--border-light);
+            color: var(--text-secondary);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            margin: 3px;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+        .tag-pill:hover {
+            border-color: var(--accent-1);
+            color: #fff;
+            background: rgba(99, 102, 241, 0.2);
+        }
+
+        .score-ring {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.8rem;
+            position: relative;
+            margin: 0 auto;
+            background: conic-gradient(#10b981 0deg, #10b981 var(--score-deg, 270deg), #1e293b var(--score-deg, 270deg));
+            color: #10b981;
+        }
+        .score-ring-inner {
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .channel-banner-container {
+            position: relative;
+            height: 180px;
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            overflow: hidden;
+        }
+        .channel-banner-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .channel-avatar-lg {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 4px solid var(--bg-card);
+            position: absolute;
+            bottom: -30px;
+            left: 24px;
+            background: #1a1a2e;
+            object-fit: cover;
+        }
+        .channel-info-section {
+            padding: 40px 24px 20px;
+            background: var(--bg-card);
+            border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            border-top: none;
+        }
+        .channel-stats-row {
+            display: flex;
+            gap: 28px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+        .subscribe-btn-mock {
+            background: #cc0000;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .toast-custom {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            padding: 14px 20px;
+            color: var(--text-primary);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+            animation: toastIn 0.4s ease, toastOut 0.4s ease 2.6s forwards;
+        }
+        @keyframes toastIn {
+            from {
+                transform: translateX(120%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        @keyframes toastOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(120%);
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .mobile-menu-btn {
+                display: block !important;
+            }
+            .channel-stats-row {
+                gap: 12px;
+            }
+        }
+        @media (min-width: 769px) {
+            .mobile-menu-btn {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <button class="mobile-menu-btn btn-glow"
+    style="position:fixed;top:22px;left:22px;width:42px;height:42px;padding:0;border-radius:50%;"
+    onclick="document.getElementById('sidebar').classList.toggle('open')" title="Menu">
+    <i class="fas fa-bars"></i>
+</button>
+
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon"><i class="fab fa-youtube"></i></div>
+        <div style="font-weight:700;font-size:1.05rem;">MYAI</div>
+    </div>
+    <nav class="sidebar-nav">
+        <button class="nav-item active" data-section="dashboard" onclick="switchSection('dashboard', this)">📊 Dashboard</button>
+        <button class="nav-item" data-section="seo-analyzer" onclick="switchSection('seo-analyzer', this)">🔍 SEO Analyzer</button>
+        <button class="nav-item" data-section="channel-analytics" onclick="switchSection('channel-analytics', this)">📈 Channel Page</button>
+        <button class="nav-item" data-section="trending-finder" onclick="switchSection('trending-finder', this)">🔥 Trending</button>
+        <button class="nav-item" data-section="tag-generator" onclick="switchSection('tag-generator', this)">🏷️ Tag Generator</button>
+        <button class="nav-item" data-section="thumbnail-toolkit" onclick="switchSection('thumbnail-toolkit', this)">🖼️ Thumbnails</button>
+        <button class="nav-item" data-section="keyword-research" onclick="switchSection('keyword-research', this)">🔑 Keywords</button>
+        <button class="nav-item" data-section="watchlist" onclick="switchSection('watchlist', this)">📌 Watchlist <span class="badge bg-primary ms-2" id="watchlist-count-badge">0</span></button>
+    </nav>
+    <div class="p-3 text-center small text-muted border-top">v2.0 • Manhabibi Youtube Artifitial Intelligence (MYAI)</div>
+</aside>
+
+<main class="main-content" id="main-content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 id="section-title">📊 Dashboard</h2>
+        <button class="btn btn-outline-secondary rounded-circle" onclick="toggleTheme()" title="Dark/Light">
+            <i class="fas fa-moon" id="theme-icon"></i>
+        </button>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="section-panel active" id="section-dashboard">
+        <div class="row g-3 mb-3">
+            <div class="col-md-3 col-6"><div class="stat-card"><div class="stat-value">7</div><div class="stat-label">Power Tools</div></div></div>
+            <div class="col-md-3 col-6"><div class="stat-card"><div class="stat-value" id="dash-watchlist-count">0</div><div class="stat-label">Saved Videos</div></div></div>
+            <div class="col-md-3 col-6"><div class="stat-card"><div class="stat-value">∞</div><div class="stat-label">Secure Proxy</div></div></div>
+            <div class="col-md-3 col-6"><div class="stat-card"><div class="stat-value">US</div><div class="stat-label">Default Region</div></div></div>
+        </div>
+        <div class="glass-card p-4 text-center">
+            <h4>🚀 All-in-One Creator Suite</h4>
+            <p class="text-muted">Advanced YouTube analytics, SEO, trending discovery & channel intelligence.</p>
+        </div>
+    </div>
+
+    <!-- SEO ANALYZER -->
+    <div class="section-panel" id="section-seo-analyzer">
+        <div class="glass-card p-4 mb-3">
+            <h5>🔍 YouTube SEO Analyzer</h5>
+            <div class="input-group">
+                <input type="text" class="form-control-custom" id="seo-video-url" placeholder="Paste video URL...">
+                <button class="btn-glow ms-2" onclick="analyzeSEO()" id="btn-seo">Analyze</button>
+            </div>
+        </div>
+        <div id="seo-results" style="display:none;"></div>
+    </div>
+
+    <!-- CHANNEL ANALYTICS (YouTube-style page) -->
+    <div class="section-panel" id="section-channel-analytics">
+        <div class="glass-card p-4 mb-3">
+            <h5>📈 Channel Intelligence</h5>
+            <div class="input-group">
+                <input type="text" class="form-control-custom" id="channel-input" placeholder="Channel ID / @handle / URL">
+                <button class="btn-glow ms-2" onclick="analyzeChannel()" id="btn-channel">Analyze</button>
+            </div>
+        </div>
+        <div id="channel-results" style="display:none;"></div>
+    </div>
+
+    <!-- TRENDING FINDER -->
+    <div class="section-panel" id="section-trending-finder">
+        <div class="glass-card p-4 mb-3">
+            <h5>🔥 Trending Videos</h5>
+            <div class="row g-2">
+                <div class="col-md-3"><select class="form-control-custom" id="trending-region"><option value="US">🇺🇸 US</option><option value="GB">🇬🇧 UK</option><option value="IN">🇮🇳 India</option></select></div>
+                <div class="col-md-3"><select class="form-control-custom" id="trending-category"><option value="0">All</option><option value="10">Music</option><option value="20">Gaming</option><option value="25">News</option></select></div>
+                <div class="col-md-2"><select class="form-control-custom" id="trending-max"><option value="10">10</option><option value="20">20</option></select></div>
+                <div class="col-md-2"><button class="btn-glow w-100" onclick="fetchTrending()">Fetch</button></div>
+            </div>
+        </div>
+        <div id="trending-results" class="row g-3"></div>
+    </div>
+
+    <!-- TAG GENERATOR -->
+    <div class="section-panel" id="section-tag-generator">
+        <div class="glass-card p-4 mb-3">
+            <h5>🏷️ Smart Tag Generator</h5>
+            <div class="input-group">
+                <input type="text" class="form-control-custom" id="tag-input-title" placeholder="Enter video title...">
+                <button class="btn-glow ms-2" onclick="generateTags()">Generate</button>
+            </div>
+        </div>
+        <div id="tag-results" style="display:none;"></div>
+    </div>
+
+    <!-- THUMBNAIL TOOLKIT -->
+    <div class="section-panel" id="section-thumbnail-toolkit">
+        <div class="glass-card p-4 mb-3">
+            <h5>🖼️ Thumbnail Toolkit</h5>
+            <div class="input-group">
+                <input type="text" class="form-control-custom" id="thumb-url" placeholder="Video URL...">
+                <button class="btn-glow ms-2" onclick="fetchThumbnails()">Get Thumbnails</button>
+            </div>
+        </div>
+        <div id="thumbnail-results" class="row g-3" style="display:none;"></div>
+    </div>
+
+    <!-- KEYWORD RESEARCH -->
+    <div class="section-panel" id="section-keyword-research">
+        <div class="glass-card p-4 mb-3">
+            <h5>🔑 Keyword Research</h5>
+            <div class="input-group">
+                <input type="text" class="form-control-custom" id="keyword-input" placeholder="e.g., best credit cards">
+                <button class="btn-glow ms-2" onclick="researchKeywords()">Research</button>
+            </div>
+        </div>
+        <div id="keyword-results" style="display:none;"></div>
+    </div>
+
+    <!-- WATCHLIST -->
+    <div class="section-panel" id="section-watchlist">
+        <div class="glass-card p-4 mb-3">
+            <h5>📌 Your Watchlist</h5>
+            <button class="btn btn-outline-danger btn-sm" onclick="clearWatchlist()">Clear All</button>
+        </div>
+        <div id="watchlist-results" class="row g-3"></div>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js">
+</script>
+<script>
+    (function() {
+        // ═══════════════════════════════════════
+        //  YOUTUBE INTELLIGENCE ENGINE v2.0
+        // ═══════════════════════════════════════
+
+        // 🔑 SECURE MODE: Multiple API keys (fallback) and optional PHP proxy
+        const API_KEYS = [
+            'AIzaSyCNdLpQ7iwoY0LxOYFAUGFtluxrFQ9ef6Y','',         ];
+        // If a PHP proxy is deployed, set its URL; otherwise leave empty to use direct keys
+        const PHP_PROXY_URL = ''; // e.g., ''
+
+        let currentKeyIndex = 0;
+        let chartInstance = null;
+
+        // ── Theme ──
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute('data-bs-theme');
+            const next = current === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-bs-theme', next);
+            localStorage.setItem('yt_intel_theme', next);
+            document.getElementById('theme-icon').className = next === 'light' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+
+        // ── Toast ──
+        function showToast(msg, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = 'toast-custom';
+            toast.textContent = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3200);
+        }
+
+        // ── Format ──
+        function formatNum(n) {
+            if (!n && n !== 0) return '—';
+            n = parseInt(n);
+            if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+            if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+            return n.toLocaleString();
+        }
+
+        // ── Extract Video ID ──
+        function extractVideoId(url) {
+            const m = url.match(/(?:youtu\.be\/|v=|\/shorts\/|embed\/)([a-zA-Z0-9_-]{11})/);
+            return m ? m[1] : url.match(/^([a-zA-Z0-9_-]{11})$/) ? url : null;
+        }
+
+        // ── Core API Call with Fallback ──
+        async function callYouTubeAPI(endpoint, params = {}) {
+    // If PHP proxy is set, use it exclusively
+    if (PHP_PROXY_URL) {
+        const url = new URL(PHP_PROXY_URL);
+        url.searchParams.set('endpoint', endpoint);
+        Object.entries(params).forEach(([k, v]) => {
+            if (v !== undefined && v !== null) url.searchParams.set(k, v);
+        });
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error('Proxy error ' + resp.status);
+        return resp.json();
+    }
+
+    // Direct API with fallback keys
+    let lastError;
+    for (let i = 0; i < API_KEYS.length; i++) {
+        const key = API_KEYS[currentKeyIndex % API_KEYS.length];
+        currentKeyIndex++;
+        try {
+            const url = new URL(`https://www.googleapis.com/youtube/v3/${endpoint}`);
+            url.searchParams.set('key', key);
+            Object.entries(params).forEach(([k, v]) => {
+                if (v !== undefined && v !== null) url.searchParams.set(k, v);
+            });
+            const resp = await fetch(url);
+            if (resp.status === 403 || resp.status === 429) {
+                const err = await resp.json().catch(() => ({}));
+                if (err.error?.errors?.some(e => e.reason === 'quotaExceeded' || e.reason === 'dailyLimitExceeded')) {
+                    console.warn(`Key ${i+1} quota exceeded, switching...`);
+                    continue;
+                }
+                throw new Error(err.error?.message || 'Access denied');
+            }
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            return await resp.json();
+        } catch (e) {
+            lastError = e;
+            if (i === API_KEYS.length - 1) throw lastError;
+        }
+    }
+    throw lastError;
+}
+
+        // ── Section Switch ──
+        function switchSection(id, btn) {
+            document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.sidebar-nav .nav-item').forEach(b => b.classList.remove('active'));
+            document.getElementById(`section-${id}`).classList.add('active');
+            if (btn) btn.classList.add('active');
+            document.getElementById('section-title').textContent = btn ? btn.textContent.trim() : 'Dashboard';
+            document.getElementById('sidebar').classList.remove('open');
+            if (chartInstance && id !== 'channel-analytics') { chartInstance.destroy();
+                chartInstance = null; }
+            if (id === 'watchlist') renderWatchlist();
+        }
+        window.switchSection = switchSection;
+        window.toggleTheme = toggleTheme;
+
+        // ── Watchlist Logic ──
+        function getWatchlist() { return JSON.parse(localStorage.getItem('yt_watchlist') || '[]'); }
+
+        function saveWatchlist(list) { localStorage.setItem('yt_watchlist', JSON.stringify(list));
+            updateWatchlistCount(); }
+
+        function addToWatchlist(videoId, title, channel, thumb) {
+            const list = getWatchlist();
+            if (list.find(v => v.videoId === videoId)) return showToast('Already saved!');
+            list.unshift({ videoId, title, channel, thumb, savedAt: new Date().toISOString() });
+            if (list.length > 100) list.length = 100;
+            saveWatchlist(list);
+            showToast('✅ Saved to Watchlist');
+            renderWatchlist();
+        }
+
+        function removeFromWatchlist(index) {
+            const list = getWatchlist();
+            list.splice(index, 1);
+            saveWatchlist(list);
+            renderWatchlist();
+        }
+
+        function clearWatchlist() {
+            if (confirm('Clear all?')) { saveWatchlist([]);
+                renderWatchlist(); }
+        }
+
+        function renderWatchlist() {
+            const list = getWatchlist();
+            const container = document.getElementById('watchlist-results');
+            if (!container) return;
+            container.innerHTML = list.length ? list.map((v, i) => `
+                <div class="col-md-6 col-lg-4">
+                    <div class="video-result-card">
+                        <img src="${v.thumb||''}" alt="" onerror="this.style.display='none'" loading="lazy">
+                        <div>
+                            <div class="fw-bold small">${v.title}</div>
+                            <div class="text-muted small">${v.channel}</div>
+                            <a href="https://youtube.com/watch?v=${v.videoId}" target="_blank" class="btn btn-sm btn-outline-primary mt-1">Watch</a>
+                            <button class="btn btn-sm btn-outline-danger mt-1" onclick="removeFromWatchlist(${i})">🗑️</button>
+                        </div>
+                    </div>
+                </div>`).join('') : '<div class="col-12 text-center text-muted p-5">No saved videos.</div>';
+            updateWatchlistCount();
+        }
+
+        function updateWatchlistCount() {
+            const c = getWatchlist().length;
+            const badge = document.getElementById('watchlist-count-badge');
+            if (badge) badge.textContent = c;
+            const dash = document.getElementById('dash-watchlist-count');
+            if (dash) dash.textContent = c;
+        }
+        window.addToWatchlist = addToWatchlist;
+        window.removeFromWatchlist = removeFromWatchlist;
+        window.clearWatchlist = clearWatchlist;
+
+        // ═══════════ SEO ANALYZER ═══════════
+        window.analyzeSEO = async function() {
+            const input = document.getElementById('seo-video-url').value;
+            const videoId = extractVideoId(input);
+            if (!videoId) return showToast('Invalid YouTube URL');
+            const btn = document.getElementById('btn-seo');
+            btn.disabled = true;
+            btn.textContent = '...';
+            try {
+                const data = await callYouTubeAPI('videos', { part: 'snippet,statistics', id: videoId });
+                if (!data.items || !data.items[0]) return showToast('Video not found');
+                const v = data.items[0];
+                const s = v.snippet;
+                const st = v.statistics;
+                const title = s.title || '';
+                const tags = s.tags || [];
+                const desc = s.description || '';
+                const score = Math.min(100, (title.length >= 30 && title.length <= 70 ? 25 : 10) +
+                    (tags.length >= 10 ? 20 : 5) + (desc.length > 100 ? 15 : 5) + (/\d{4}/.test(title) ? 10 : 0) +
+                    (/how|tutorial|guide/i.test(title) ? 10 : 0) + (/best|top|review/i.test(title) ? 10 : 0));
+                const deg = (score / 100) * 360;
+                document.getElementById('seo-results').style.display = 'block';
+                document.getElementById('seo-results').innerHTML = `
+                    <div class="row g-3">
+                        <div class="col-md-4 text-center">
+                            <div class="score-ring" style="--score-deg:${deg}deg;"><div class="score-ring-inner">${score}</div></div>
+                            <small>${score>=70?'Great':score>=40?'Okay':'Poor'} SEO</small>
+                        </div>
+                        <div class="col-md-8">
+                            <h6>${title}</h6>
+                            <p class="text-muted small">${s.channelTitle} • Views: ${formatNum(st.viewCount)}</p>
+                            <div>${tags.map(t=>`<span class="tag-pill">${t}</span>`).join('')||'No tags'}</div>
+                            <button class="btn btn-sm btn-outline-light mt-2" onclick="addToWatchlist('${videoId}','${title.replace(/'/g,"\\'")}','${(s.channelTitle||'').replace(/'/g,"\\'")}','${(s.thumbnails?.medium?.url||'')}')">📌 Save</button>
+                        </div>
+                    </div>`;
+                showToast(`SEO Score: ${score}/100`);
+            } catch (e) { showToast('Error: ' + e.message); } finally { btn.disabled = false;
+                btn.textContent = 'Analyze'; }
+        };
+
+        // ═══════════ CHANNEL PAGE (Social Blade style) ═══════════
+        window.analyzeChannel = async function() {
+            const input = document.getElementById('channel-input').value;
+            let channelId = input.match(/UC[a-zA-Z0-9_-]+/)?.[0] || input;
+            if (!channelId) return showToast('Enter valid channel ID or URL');
+            const btn = document.getElementById('btn-channel');
+            btn.disabled = true;
+            btn.textContent = '...';
+            try {
+                const chData = await callYouTubeAPI('channels', { part: 'snippet,statistics,brandingSettings',
+                    id: channelId });
+                if (!chData.items || !chData.items[0]) {
+                    // fallback search by handle
+                    const search = await callYouTubeAPI('search', { part: 'snippet', q: input, type: 'channel',
+                        maxResults: 1 });
+                    if (search.items && search.items[0]) channelId = search.items[0].snippet.channelId;
+                    else return showToast('Channel not found');
+                    const retry = await callYouTubeAPI('channels', { part: 'snippet,statistics,brandingSettings',
+                        id: channelId });
+                    if (!retry.items || !retry.items[0]) return showToast('Channel not found');
+                    chData.items = retry.items;
+                }
+                const ch = chData.items[0];
+                const s = ch.snippet;
+                const st = ch.statistics;
+                const banner = ch.brandingSettings?.image?.bannerExternalUrl || '';
+                const logo = s.thumbnails?.high?.url || s.thumbnails?.default?.url || '';
+                const published = new Date(s.publishedAt);
+                const monthsOld = Math.max(1, (new Date() - published) / (1000 * 60 * 60 * 24 * 30));
+                const avgMonthlySubs = Math.round((st.subscriberCount || 0) / monthsOld);
+
+                // Fetch recent videos
+                const videos = await callYouTubeAPI('search', { part: 'snippet', channelId: channelId,
+                    order: 'date', maxResults: 6, type: 'video' });
+
+                let recentHTML = '';
+                if (videos.items && videos.items.length) {
+                    recentHTML = videos.items.map(v => `
+                        <div class="col-md-4 mb-3">
+                            <div class="video-result-card" onclick="window.open('https://youtube.com/watch?v=${v.id.videoId}','_blank')">
+                                <img src="${v.snippet.thumbnails.medium.url}" alt="">
+                                <div class="small"><strong>${v.snippet.title}</strong><br><span class="text-muted">${v.snippet.channelTitle}</span></div>
+                            </div>
+                        </div>`).join('');
+                }
+
+                document.getElementById('channel-results').style.display = 'block';
+                document.getElementById('channel-results').innerHTML = `
+                    <div class="channel-banner-container">
+                        ${banner ? `<img src="${banner}" class="channel-banner-img" alt="">` : ''}
+                        <img src="${logo}" class="channel-avatar-lg" alt="">
+                    </div>
+                    <div class="channel-info-section">
+                        <h4>${s.title} <span class="badge bg-secondary">${s.customUrl||''}</span></h4>
+                        <p class="text-muted small">${s.description?.substring(0,200)||''}</p>
+                        <div class="channel-stats-row">
+                            <div><strong>${formatNum(st.subscriberCount)}</strong> subscribers</div>
+                            <div><strong>${formatNum(st.viewCount)}</strong> views</div>
+                            <div><strong>${formatNum(st.videoCount)}</strong> videos</div>
+                            <div>Joined ${published.toLocaleDateString()}</div>
+                        </div>
+                        <div class="mt-2"><span class="text-muted">📈 Est. monthly subs growth:</span> <strong>${formatNum(avgMonthlySubs)}</strong></div>
+                        <button class="subscribe-btn-mock mt-2">🔔 Subscribe</button>
+                    </div>
+                    <h5 class="mt-3">Recent Videos</h5>
+                    <div class="row">${recentHTML||'<div class="col-12 text-muted">No videos found</div>'}</div>`;
+                if (chartInstance) chartInstance.destroy();
+                // simple chart
+                const ctx = document.createElement('canvas');
+                ctx.style.maxHeight = '200px';
+                document.getElementById('channel-results').appendChild(ctx);
+                chartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Subscribers', 'Views (÷100)', 'Videos'],
+                        datasets: [{
+                            label: s.title,
+                            data: [st.subscriberCount || 0, Math.round((st.viewCount || 0) /
+                                100), st.videoCount || 0
+                            ],
+                            backgroundColor: ['#6366f1', '#8b5cf6', '#06b6d4']
+                        }]
+                    }
+                });
+                showToast('Channel loaded!');
+            } catch (e) { showToast('Error: ' + e.message); } finally { btn.disabled = false;
+                btn.textContent = 'Analyze'; }
+        };
+
+        // ═══════════ TRENDING ═══════════
+        window.fetchTrending = async function() {
+    const region = document.getElementById('trending-region').value;
+    const cat = document.getElementById('trending-category').value;
+    const max = document.getElementById('trending-max').value;
+    const btn = document.querySelector('#section-trending-finder .btn-glow');
+    btn.disabled = true;
+    try {
+        // Build params without undefined values
+        const params = {
+            part: 'snippet,statistics',
+            chart: 'mostPopular',
+            regionCode: region,
+            maxResults: max
+        };
+        if (cat !== '0') {
+            params.videoCategoryId = cat;
+        }
+        const data = await callYouTubeAPI('videos', params);
+        const container = document.getElementById('trending-results');
+        container.innerHTML = data.items.map(v => `
+            <div class="col-md-6 col-lg-4">
+                <div class="video-result-card" onclick="window.open('https://youtube.com/watch?v=${v.id}','_blank')">
+                    <img src="${v.snippet.thumbnails.medium.url}" alt="">
+                    <div><div class="fw-bold small">${v.snippet.title}</div><small class="text-muted">${v.snippet.channelTitle} • ${formatNum(v.statistics.viewCount)} views</small>
+                    <button class="btn btn-sm btn-outline-light mt-1" onclick="event.stopPropagation();addToWatchlist('${v.id}','${v.snippet.title.replace(/'/g,"\\'")}','${v.snippet.channelTitle.replace(/'/g,"\\'")}','${v.snippet.thumbnails.medium.url}')">📌</button></div>
+                </div>
+            </div>`).join('');
+    } catch (e) { showToast('Error: ' + e.message); } finally { btn.disabled = false; }
+};
+
+        // ═══════════ TAG GENERATOR ═══════════
+        window.generateTags = function() {
+            const title = document.getElementById('tag-input-title').value;
+            if (!title) return showToast('Enter a title');
+            const words = title.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(w => w.length > 2);
+            const tags = new Set(words);
+            ['best', 'top', 'review', 'tutorial', '2024', '2025', 'how to', 'guide', 'vs', 'free'].forEach(m => {
+                words.forEach(w => tags.add(w + ' ' + m));
+            });
+            const arr = Array.from(tags).slice(0, 30);
+            document.getElementById('tag-results').style.display = 'block';
+            document.getElementById('tag-results').innerHTML = `
+                <div class="glass-card p-3">
+                    <h6>🏷️ Generated Tags <button class="btn btn-sm btn-outline-light ms-2" onclick="navigator.clipboard.writeText('${arr.join(', ')}')">Copy All</button></h6>
+                    <div>${arr.map(t=>`<span class="tag-pill">${t}</span>`).join('')}</div>
+                </div>`;
+        };
+
+        // ═══════════ THUMBNAILS ═══════════
+        window.fetchThumbnails = function() {
+            const id = extractVideoId(document.getElementById('thumb-url').value);
+            if (!id) return showToast('Invalid URL');
+            const sizes = [
+                { label: 'Default', url: `https://img.youtube.com/vi/${id}/default.jpg` },
+                { label: 'Medium', url: `https://img.youtube.com/vi/${id}/mqdefault.jpg` },
+                { label: 'High', url: `https://img.youtube.com/vi/${id}/hqdefault.jpg` },
+                { label: 'Standard', url: `https://img.youtube.com/vi/${id}/sddefault.jpg` },
+                { label: 'Max', url: `https://img.youtube.com/vi/${id}/maxresdefault.jpg` }
+            ];
+            const container = document.getElementById('thumbnail-results');
+            container.style.display = 'flex';
+            container.innerHTML = sizes.map(s => `
+                <div class="col-md-4 col-6">
+                    <div class="glass-card p-2 text-center">
+                        <img src="${s.url}" style="width:100%;border-radius:8px;" onerror="this.style.display='none'">
+                        <p class="small mt-1">${s.label}</p>
+                        <a href="${s.url}" target="_blank" class="btn btn-sm btn-outline-light">Download</a>
+                    </div>
+                </div>`).join('');
+        };
+
+        // ═══════════ KEYWORD RESEARCH ═══════════
+        window.researchKeywords = async function() {
+            const kw = document.getElementById('keyword-input').value;
+            if (!kw) return showToast('Enter a keyword');
+            const btn = document.querySelector('#section-keyword-research .btn-glow');
+            btn.disabled = true;
+            try {
+                const data = await callYouTubeAPI('search', { part: 'snippet', q: kw, type: 'video',
+                    maxResults: 10 });
+                const freq = {};
+                data.items.forEach(v => {
+                    v.snippet.title.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(w => w
+                        .length > 3).forEach(w => freq[w] = (freq[w] || 0) + 1);
+                });
+                const sorted = Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 15);
+                document.getElementById('keyword-results').style.display = 'block';
+                document.getElementById('keyword-results').innerHTML = `
+                    <div class="glass-card p-3 mb-3">
+                        <h6>💡 Suggested Keywords</h6>
+                        <div>${sorted.map(([w,c])=>`<span class="tag-pill highlight">${w} (${c})</span>`).join('')}</div>
+                    </div>
+                    <div class="row">${data.items.map(v=>`
+                        <div class="col-md-6">
+                            <div class="video-result-card" onclick="window.open('https://youtube.com/watch?v=${v.id.videoId}','_blank')">
+                                <img src="${v.snippet.thumbnails.medium.url}" alt="">
+                                <div><div class="fw-bold small">${v.snippet.title}</div><small class="text-muted">${v.snippet.channelTitle}</small></div>
+                            </div>
+                        </div>`).join('')}</div>`;
+            } catch (e) { showToast('Error: ' + e.message); } finally { btn.disabled = false; }
+        };
+
+        // ═══════════ INIT ═══════════
+        function init() {
+            const savedTheme = localStorage.getItem('yt_intel_theme') || 'dark';
+            document.documentElement.setAttribute('data-bs-theme', savedTheme);
+            document.getElementById('theme-icon').className = savedTheme === 'light' ? 'fas fa-sun' : 'fas fa-moon';
+            updateWatchlistCount();
+            renderWatchlist();
+            window.switchSection('dashboard', document.querySelector('[data-section="dashboard"]'));
+            // Enter handlers
+            document.getElementById('seo-video-url')?.addEventListener('keydown', e => e.key === 'Enter' &&
+                analyzeSEO());
+            document.getElementById('channel-input')?.addEventListener('keydown', e => e.key === 'Enter' &&
+                analyzeChannel());
+            document.getElementById('keyword-input')?.addEventListener('keydown', e => e.key === 'Enter' &&
+                researchKeywords());
+            document.getElementById('tag-input-title')?.addEventListener('keydown', e => e.key === 'Enter' &&
+                generateTags());
+            document.getElementById('thumb-url')?.addEventListener('keydown', e => e.key === 'Enter' &&
+                fetchThumbnails());
+            console.log('YouTube Intelligence Ready • Multi-key secure');
+        }
+        document.addEventListener('DOMContentLoaded', init);
+    })();
+</script>
+</body>
+</html>
