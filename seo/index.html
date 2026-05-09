@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate SEO Tools · Meta · Keywords · Readability · Robots · Schema · Score Card</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 28px rgba(0, 0, 0, 0.05);
+            --radius: 1.1rem;
+        }
+        * { box-sizing: border-box; }
+        body {
+            background: var(--bg);
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: var(--text);
+            padding: 1rem 0 2rem;
+            min-height: 100vh;
+        }
+        .card {
+            border: none;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            background: var(--card-bg);
+        }
+        .card-header {
+            background: transparent;
+            border-bottom: 1px solid var(--border);
+            font-weight: 700;
+            font-size: 0.9rem;
+            padding: 0.85rem 1.2rem;
+            border-radius: var(--radius) var(--radius) 0 0 !important;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .form-label {
+            font-weight: 600;
+            font-size: 0.74rem;
+            color: var(--text);
+            margin-bottom: 0.2rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .form-control, .form-select {
+            border-radius: 0.7rem;
+            border: 1.5px solid var(--border);
+            padding: 0.5rem 0.8rem;
+            font-size: 0.87rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(99,102,241,0.12);
+        }
+        .btn-primary {
+            background: var(--primary);
+            border: none;
+            border-radius: 2.5rem;
+            padding: 0.5rem 1.4rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            box-shadow: 0 4px 14px rgba(99,102,241,0.3);
+            transition: all 0.2s;
+        }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+        .btn-outline-primary { border-radius: 2rem; font-weight: 500; font-size: 0.8rem; }
+        .btn-sm { border-radius: 1.8rem; padding: 0.28rem 0.8rem; font-size: 0.73rem; }
+        .nav-pills .nav-link {
+            border-radius: 2rem;
+            font-weight: 600;
+            font-size: 0.76rem;
+            padding: 0.38rem 0.9rem;
+            color: var(--text-muted);
+            margin: 0.1rem;
+        }
+        .nav-pills .nav-link.active {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 3px 10px rgba(99,102,241,0.25);
+        }
+        .serp-preview {
+            background: #fff;
+            border: 1px solid #dadce0;
+            border-radius: 0.6rem;
+            padding: 1rem;
+            max-width: 600px;
+            font-family: Arial, sans-serif;
+        }
+        .serp-title {
+            color: #1a0dab;
+            font-size: 1.25rem;
+            line-height: 1.3;
+            cursor: pointer;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .serp-url {
+            color: #006621;
+            font-size: 0.875rem;
+            line-height: 1.3;
+        }
+        .serp-desc {
+            color: #545454;
+            font-size: 0.875rem;
+            line-height: 1.58;
+        }
+        .pixel-bar {
+            height: 5px;
+            border-radius: 3px;
+            overflow: hidden;
+            background: #e9ecef;
+            margin-top: 0.3rem;
+        }
+        .pixel-bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+        .pixel-bar-fill.good { background: var(--success); }
+        .pixel-bar-fill.warn { background: var(--warning); }
+        .pixel-bar-fill.bad { background: var(--danger); }
+        .stat-badge {
+            border-radius: 2rem;
+            padding: 0.18rem 0.6rem;
+            font-size: 0.68rem;
+            font-weight: 700;
+        }
+        .stat-badge.green { background: #d1fae5; color: #065f46; }
+        .stat-badge.yellow { background: #fef3c7; color: #92400e; }
+        .stat-badge.red { background: #fef2f2; color: #991b1b; }
+        .score-circle {
+            width: 85px; height: 85px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; font-weight: 800;
+            margin: 0 auto;
+            border: 5px solid;
+        }
+        .score-circle.good { border-color: var(--success); color: var(--success); }
+        .score-circle.avg { border-color: var(--warning); color: var(--warning); }
+        .score-circle.poor { border-color: var(--danger); color: var(--danger); }
+        .keyword-row { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0; border-bottom: 1px dashed var(--border); font-size: 0.85rem; }
+        .toast-custom { position: fixed; bottom: 20px; right: 20px; z-index: 9999; animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from { transform: translateY(100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .privacy-badge {
+            background: #d1fae5; color: #065f46; border-radius: 2rem;
+            padding: 0.2rem 0.7rem; font-size: 0.68rem; font-weight: 700;
+            display: inline-flex; align-items: center; gap: 0.3rem;
+        }
+        textarea.form-control { min-height: 100px; }
+        @media (max-width: 768px) {
+            .nav-pills .nav-link { font-size: 0.66rem; padding: 0.3rem 0.6rem; }
+            .serp-preview { padding: 0.7rem; }
+            .score-circle { width: 65px; height: 65px; font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" style="max-width: 1150px;">
+        <!-- Header -->
+        <div class="text-center mb-3">
+            <h2 class="fw-bold"><i class="bi bi-search me-2" style="color:var(--primary);"></i>Ultimate SEO Tools</h2>
+            <p class="text-muted mb-1 small">Meta Generator · Keyword Density · Readability · Robots.txt · Schema · Score Card</p>
+            <span class="privacy-badge"><i class="bi bi-shield-check-fill"></i> Privacy-First · All Browser-Based · No Uploads</span>
+        </div>
+
+        <!-- TOOL SELECTOR -->
+        <ul class="nav nav-pills justify-content-center mb-3 flex-wrap" id="toolTabs" role="tablist">
+            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabMeta"><i class="bi bi-tags me-1"></i>Meta & SERP</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabKeyword"><i class="bi bi-bar-chart me-1"></i>Keyword Density</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabReadability"><i class="bi bi-book me-1"></i>Readability</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabRobots"><i class="bi bi-robot me-1"></i>Robots.txt</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabSchema"><i class="bi bi-code-square me-1"></i>Schema</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabScore"><i class="bi bi-award me-1"></i>Score Card</button></li>
+        </ul>
+
+        <div class="tab-content">
+            <!-- ====== 1. META TAG & SERP PREVIEW ====== -->
+            <div class="tab-pane fade show active" id="tabMeta">
+                <div class="row g-3">
+                    <div class="col-lg-5">
+                        <div class="card h-100">
+                            <div class="card-header"><i class="bi bi-tags me-2"></i>Meta Tag Generator</div>
+                            <div class="card-body">
+                                <label class="form-label">Page URL</label>
+                                <input type="text" class="form-control mb-3" id="metaUrl" value="https://example.com/blog/seo-tips-2025" placeholder="https://example.com/page">
+                                <label class="form-label">Title Tag <small class="text-muted">(50-60 chars / ~600px)</small></label>
+                                <input type="text" class="form-control mb-1" id="metaTitle" value="Ultimate SEO Guide 2025: 10 Proven Tips to Boost Rankings" maxlength="120">
+                                <div class="d-flex justify-content-between small mb-2"><span id="metaTitleChars">58 chars</span><span id="metaTitlePx">585px / 600px</span></div>
+                                <div class="pixel-bar mb-3"><div class="pixel-bar-fill good" id="metaTitleBar" style="width:97%;"></div></div>
+                                <label class="form-label">Meta Description <small class="text-muted">(150-160 chars / ~920px)</small></label>
+                                <textarea class="form-control mb-1" id="metaDesc" rows="3" maxlength="320">Learn the most effective SEO strategies for 2025. From keyword research to technical optimization, this guide covers everything you need to rank higher on Google.</textarea>
+                                <div class="d-flex justify-content-between small mb-2"><span id="metaDescChars">175 chars</span><span id="metaDescPx">870px / 920px</span></div>
+                                <div class="pixel-bar mb-3"><div class="pixel-bar-fill good" id="metaDescBar" style="width:94%;"></div></div>
+                                <label class="form-label">Open Graph Image URL <small class="text-muted">(1200×630px recommended)</small></label>
+                                <input type="text" class="form-control mb-2" id="metaOgImage" value="https://example.com/images/seo-guide-og.jpg" placeholder="https://example.com/image.jpg">
+                                <button class="btn btn-primary w-100 mt-2" id="copyMetaBtn"><i class="bi bi-clipboard me-2"></i>Copy All Meta Tags</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-7">
+                        <div class="card mb-3">
+                            <div class="card-header"><i class="bi bi-google me-2"></i>Google SERP Preview</div>
+                            <div class="card-body d-flex justify-content-center">
+                                <div class="serp-preview w-100">
+                                    <div class="serp-url" id="serpUrl">https://example.com › blog › seo-tips-2025</div>
+                                    <div class="serp-title" id="serpTitle">Ultimate SEO Guide 2025: 10 Proven Tips to Boost Rankings</div>
+                                    <div class="serp-desc" id="serpDesc">Learn the most effective SEO strategies for 2025. From keyword research to technical optimization, this guide covers everything you need to rank higher on Google.</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header"><i class="bi bi-share me-2"></i>Social Preview (Open Graph + Twitter)</div>
+                            <div class="card-body">
+                                <h6 class="small fw-bold text-muted mb-2">🔵 Facebook / LinkedIn (Open Graph)</h6>
+                                <div class="bg-light rounded-3 p-3 mb-3 font-monospace small" style="max-height:120px;overflow-y:auto;" id="ogPreview">&lt;meta property="og:title" content="..."&gt;<br>&lt;meta property="og:description" content="..."&gt;<br>&lt;meta property="og:image" content="..."&gt;</div>
+                                <h6 class="small fw-bold text-muted mb-2">🐦 Twitter / X (Twitter Card)</h6>
+                                <div class="bg-light rounded-3 p-3 font-monospace small" style="max-height:120px;overflow-y:auto;" id="twitterPreview">&lt;meta name="twitter:card" content="summary_large_image"&gt;<br>&lt;meta name="twitter:title" content="..."&gt;</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ====== 2. KEYWORD DENSITY CHECKER ====== -->
+            <div class="tab-pane fade" id="tabKeyword">
+                <div class="row g-3">
+                    <div class="col-lg-5">
+                        <div class="card h-100">
+                            <div class="card-header"><i class="bi bi-bar-chart me-2"></i>Keyword Density Checker</div>
+                            <div class="card-body">
+                                <label class="form-label">Target Keyword</label>
+                                <input type="text" class="form-control mb-3" id="kdKeyword" value="SEO strategy" placeholder="Enter target keyword">
+                                <label class="form-label">Paste Your Content</label>
+                                <textarea class="form-control mb-3" id="kdContent" rows="10" placeholder="Paste your article or content here...">Developing a strong SEO strategy is essential for any business in 2025. A well-crafted SEO strategy can increase organic traffic and improve search rankings. This guide covers the core components of an effective SEO strategy, including keyword research, on-page optimization, and link building. Without a clear SEO strategy, your content may fail to reach its target audience. Start building your SEO strategy today to stay ahead of competitors.</textarea>
+                                <button class="btn btn-primary w-100" id="analyzeKDBtn"><i class="bi bi-search me-2"></i>Analyze Keyword Density</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-7">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between">
+                                <span><i class="bi bi-graph-up me-2"></i>Density Results</span>
+                                <span id="kdTotalWords" class="small text-muted">0 words</span>
+                            </div>
+                            <div class="card-body" id="kdResults">
+                                <p class="text-muted text-center py-4">Enter a keyword and content to analyze density</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ====== 3. READABILITY ANALYZER ====== -->
+            <div class="tab-pane fade" id="tabReadability">
+                <div class="row g-3">
+                    <div class="col-lg-5">
+                        <div class="card h-100">
+                            <div class="card-header"><i class="bi bi-book me-2"></i>Readability Analyzer</div>
+                            <div class="card-body">
+                                <label class="form-label">Paste Your Content</label>
+                                <textarea class="form-control mb-3" id="readContent" rows="12" placeholder="Paste text to analyze readability...">Search engine optimization has changed dramatically over the past few years. Today, content quality matters more than keyword density. Google's helpful content update rewards pages that demonstrate real expertise and satisfy user intent. To rank well in 2025, you must create comprehensive content that answers questions thoroughly. Use clear headings to structure your articles. Write in short paragraphs that are easy to scan. Avoid jargon and complex sentences whenever possible. The best performing content is readable and accessible to a wide audience.</textarea>
+                                <button class="btn btn-primary w-100" id="analyzeReadBtn"><i class="bi bi-calculator me-2"></i>Analyze Readability</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-7">
+                        <div class="card mb-3">
+                            <div class="card-header"><i class="bi bi-speedometer2 me-2"></i>Flesch-Kincaid Scores</div>
+                            <div class="card-body text-center" id="readResults">
+                                <p class="text-muted py-4">Click "Analyze Readability" to see scores</p>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-body py-2 px-3 small text-muted">
+                                <i class="bi bi-info-circle me-1"></i>
+                                <strong>Formula:</strong> 206.835 − (1.015 × ASL) − (84.6 × ASW) · 
+                                ASL = Average Sentence Length · ASW = Average Syllables per Word · 
+                                Scores: 90-100 Very Easy · 70-79 Fairly Easy · 60-69 Standard · 30-49 Difficult · 0-29 Very Confusing
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ====== 4. ROBOTS.TXT GENERATOR ====== -->
+            <div class="tab-pane fade" id="tabRobots">
+                <div class="row g-3">
+                    <div class="col-lg-5">
+                        <div class="card h-100">
+                            <div class="card-header"><i class="bi bi-robot me-2"></i>Robots.txt Generator</div>
+                            <div class="card-body">
+                                <label class="form-label">Site URL</label>
+                                <input type="text" class="form-control mb-3" id="robotsUrl" value="https://example.com" placeholder="https://example.com">
+                                <label class="form-label">Block Specific Crawlers</label>
+                                <div class="d-flex flex-wrap gap-1 mb-3" id="robotsBlockBots">
+                                    <span class="badge bg-light text-dark border p-2 cursor-pointer" data-bot="GPTBot" style="cursor:pointer;">🤖 GPTBot</span>
+                                    <span class="badge bg-light text-dark border p-2" data-bot="CCBot" style="cursor:pointer;">🤖 CCBot</span>
+                                    <span class="badge bg-light text-dark border p-2" data-bot="anthropic-ai" style="cursor:pointer;">🤖 Anthropic</span>
+                                    <span class="badge bg-light text-dark border p-2" data-bot="Google-Extended" style="cursor:pointer;">🤖 Google-Extended</span>
+                                </div>
+                                <label class="form-label">Disallowed Paths</label>
+                                <input type="text" class="form-control mb-3" id="robotsDisallow" value="/admin/, /wp-admin/, /cgi-bin/" placeholder="/admin/, /private/">
+                                <label class="form-label">Crawl Delay (seconds)</label>
+                                <input type="number" class="form-control mb-3" id="robotsDelay" value="5" min="0" max="120">
+                                <button class="btn btn-primary w-100" id="generateRobotsBtn"><i class="bi bi-file-code me-2"></i>Generate robots.txt</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-7">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between">
+                                <span><i class="bi bi-file-earmark-code me-2"></i>Generated robots.txt</span>
+                                <button class="btn btn-sm btn-outline-primary" id="copyRobotsBtn"><i class="bi bi-clipboard me-1"></i>Copy</button>
+                            </div>
+                            <div class="card-body">
+                                <pre class="bg-dark text-light rounded-3 p-3 small mb-0" id="robotsOutput" style="max-height:400px;overflow-y:auto;">Click "Generate robots.txt" to create your file</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ====== 5. JSON-LD SCHEMA GENERATOR ====== -->
+            <div class="tab-pane fade" id="tabSchema">
+                <div class="row g-3">
+                    <div class="col-lg-5">
+                        <div class="card h-100">
+                            <div class="card-header"><i class="bi bi-code-square me-2"></i>JSON-LD Schema Generator</div>
+                            <div class="card-body">
+                                <label class="form-label">Schema Type</label>
+                                <select class="form-select mb-3" id="schemaType">
+                                    <option value="Article" selected>Article / Blog Post</option>
+                                    <option value="FAQ">FAQ Page</option>
+                                    <option value="Product">Product</option>
+                                    <option value="Organization">Organization</option>
+                                    <option value="LocalBusiness">Local Business</option>
+                                    <option value="BreadcrumbList">Breadcrumb List</option>
+                                    <option value="HowTo">How-To Guide</option>
+                                    <option value="Recipe">Recipe</option>
+                                    <option value="Person">Person</option>
+                                </select>
+                                <div id="schemaFields"></div>
+                                <button class="btn btn-primary w-100 mt-3" id="generateSchemaBtn"><i class="bi bi-braces me-2"></i>Generate JSON-LD</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-7">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between">
+                                <span><i class="bi bi-filetype-json me-2"></i>Generated JSON-LD</span>
+                                <div><button class="btn btn-sm btn-outline-primary me-1" id="copySchemaBtn"><i class="bi bi-clipboard me-1"></i>Copy</button><button class="btn btn-sm btn-outline-primary" id="downloadSchemaBtn"><i class="bi bi-download me-1"></i>Download</button></div>
+                            </div>
+                            <div class="card-body">
+                                <pre class="bg-dark text-success rounded-3 p-3 small mb-0" id="schemaOutput" style="max-height:400px;overflow-y:auto;">{ }</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ====== 6. SEO SCORE CARD ====== -->
+            <div class="tab-pane fade" id="tabScore">
+                <div class="row g-3">
+                    <div class="col-lg-5">
+                        <div class="card h-100">
+                            <div class="card-header"><i class="bi bi-award me-2"></i>SEO Score Card</div>
+                            <div class="card-body">
+                                <label class="form-label">Page URL</label>
+                                <input type="text" class="form-control mb-3" id="scoreUrl" value="https://example.com/blog/seo-tips" placeholder="https://example.com/page">
+                                <label class="form-label">Title Tag</label>
+                                <input type="text" class="form-control mb-3" id="scoreTitle" value="SEO Tips for 2025" maxlength="120">
+                                <label class="form-label">Meta Description</label>
+                                <textarea class="form-control mb-3" id="scoreDesc" rows="3" maxlength="320">Learn SEO tips for 2025.</textarea>
+                                <label class="form-label">Heading Structure (H1-H6) <small class="text-muted">One per line, prefix like "H1:", "H2:"</small></label>
+                                <textarea class="form-control mb-3" id="scoreHeadings" rows="5" placeholder="H1: Main Title&#10;H2: Section One&#10;H2: Section Two&#10;H3: Sub-section">H1: SEO Tips for 2025&#10;H2: Keyword Research&#10;H2: On-Page SEO&#10;H3: Meta Tags&#10;H2: Link Building</textarea>
+                                <label class="form-label">Content Word Count</label>
+                                <input type="number" class="form-control mb-3" id="scoreWordCount" value="1200" min="1">
+                                <label class="form-label"># of Internal Links</label>
+                                <input type="number" class="form-control mb-3" id="scoreInternalLinks" value="5" min="0">
+                                <label class="form-label">Images with Alt Text (%)</label>
+                                <input type="range" class="form-range mb-3" id="scoreImgAlt" min="0" max="100" value="80">
+                                <small class="d-block mb-2 text-muted">Alt text coverage: <strong id="scoreImgAltLabel">80%</strong></small>
+                                <button class="btn btn-primary w-100" id="calculateScoreBtn"><i class="bi bi-calculator me-2"></i>Calculate SEO Score</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-7">
+                        <div class="card mb-3">
+                            <div class="card-header"><i class="bi bi-speedometer2 me-2"></i>Overall Score</div>
+                            <div class="card-body text-center" id="scoreResults">
+                                <p class="text-muted py-4">Fill in the form and click "Calculate SEO Score"</p>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-body py-2 px-3 small text-muted">
+                                <i class="bi bi-info-circle me-1"></i>
+                                <strong>7-Factor Weighted Model:</strong> Title (15%) · Meta Description (10%) · Heading Structure (15%) · Content Depth (25%) · Internal Links (15%) · Image Alt Text (10%) · Mobile/UX Readiness (10%)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reference Footer -->
+        <div class="card mt-3">
+            <div class="card-body py-2 px-3">
+                <div class="d-flex flex-wrap align-items-center gap-2 small text-muted">
+                    <i class="bi bi-journal-text"></i>
+                    <strong>Sources:</strong> Yoast Flesch-Kincaid · SISTRIX SERP Pixel Limits · Google Robots.txt RFC · Schema.org · RankMath Keyword Density · SurferSEO Ranking Factors
+                    <span class="ms-auto badge bg-light text-dark">v4.0 · All Browser-Based · No Server · 100% Client-Side</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js">
+    </script>
+    <script>
+        (function() {
+            const $ = (id) => document.getElementById(id);
+
+            // ==================== TOAST ====================
+            function showToast(msg, type = 'success') {
+                const existing = document.querySelector('.toast-custom');
+                if (existing) existing.remove();
+                const toast = document.createElement('div');
+                toast.className = `toast-custom alert alert-${type} py-2 px-3 shadow-sm`;
+                toast.textContent = msg;
+                document.body.appendChild(toast);
+                setTimeout(() => { toast.style.opacity = '0';
+                    toast.style.transition = 'opacity 0.3s';
+                    setTimeout(() => toast.remove(), 300); }, 2800);
+            }
+
+            // ==================== PIXEL WIDTH ESTIMATION ====================
+            function estimatePixelWidth(text, fontSize, fontFamily) {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                ctx.font = `${fontSize}px ${fontFamily}`;
+                const metrics = ctx.measureText(text);
+                return Math.round(metrics.width);
+            }
+
+            // ==================== 1. META TAG & SERP PREVIEW ====================
+            function updateMetaPreview() {
+                const title = $('metaTitle').value || '';
+                const desc = $('metaDesc').value || '';
+                const url = $('metaUrl').value || 'https://example.com';
+
+                $('metaTitleChars').textContent = title.length + ' chars';
+                const titlePx = estimatePixelWidth(title, 18, 'Arial');
+                $('metaTitlePx').textContent = titlePx + 'px / 600px';
+                const titleBar = $('metaTitleBar');
+                const titleRatio = Math.min(100, (titlePx / 600) * 100);
+                titleBar.style.width = titleRatio + '%';
+                titleBar.className = 'pixel-bar-fill ' + (titleRatio <= 95 ? 'good' : titleRatio <= 105 ?
+                    'warn' : 'bad');
+
+                $('metaDescChars').textContent = desc.length + ' chars';
+                const descPx = estimatePixelWidth(desc, 14, 'Arial');
+                $('metaDescPx').textContent = descPx + 'px / 920px';
+                const descBar = $('metaDescBar');
+                const descRatio = Math.min(100, (descPx / 920) * 100);
+                descBar.style.width = descRatio + '%';
+                descBar.className = 'pixel-bar-fill ' + (descRatio <= 95 ? 'good' : descRatio <= 105 ? 'warn' :
+                    'bad');
+
+                // SERP Preview
+                $('serpTitle').textContent = title;
+                $('serpDesc').textContent = desc;
+                try {
+                    const urlObj = new URL(url);
+                    $('serpUrl').textContent = urlObj.hostname + ' › ' + urlObj.pathname.replace(/\//g, ' › ')
+                        .replace(/^ › /, '');
+                } catch (e) { $('serpUrl').textContent = url; }
+
+                // OG Preview
+                $('ogPreview').innerHTML =
+                    `<span class="text-primary">&lt;meta</span> <span class="text-warning">property</span>=<span class="text-success">"og:title"</span> <span class="text-warning">content</span>=<span class="text-success">"${escapeHtml(title)}"</span><span class="text-primary">&gt;</span>\n<span class="text-primary">&lt;meta</span> <span class="text-warning">property</span>=<span class="text-success">"og:description"</span> <span class="text-warning">content</span>=<span class="text-success">"${escapeHtml(desc)}"</span><span class="text-primary">&gt;</span>\n<span class="text-primary">&lt;meta</span> <span class="text-warning">property</span>=<span class="text-success">"og:image"</span> <span class="text-warning">content</span>=<span class="text-success">"${escapeHtml($('metaOgImage').value)}"</span><span class="text-primary">&gt;</span>`;
+                $('twitterPreview').innerHTML =
+                    `<span class="text-primary">&lt;meta</span> <span class="text-warning">name</span>=<span class="text-success">"twitter:card"</span> <span class="text-warning">content</span>=<span class="text-success">"summary_large_image"</span><span class="text-primary">&gt;</span>\n<span class="text-primary">&lt;meta</span> <span class="text-warning">name</span>=<span class="text-success">"twitter:title"</span> <span class="text-warning">content</span>=<span class="text-success">"${escapeHtml(title)}"</span><span class="text-primary">&gt;</span>\n<span class="text-primary">&lt;meta</span> <span class="text-warning">name</span>=<span class="text-success">"twitter:description"</span> <span class="text-warning">content</span>=<span class="text-success">"${escapeHtml(desc)}"</span><span class="text-primary">&gt;</span>`;
+            }
+
+            function escapeHtml(str) { const div = document.createElement('div');
+                div.textContent = str; return div.innerHTML; }
+
+            ['metaTitle', 'metaDesc', 'metaUrl', 'metaOgImage'].forEach(id => {
+                const el = $(id);
+                if (el) el.addEventListener('input', updateMetaPreview);
+            });
+
+            $('copyMetaBtn').addEventListener('click', () => {
+                const tags = `<title>${$('metaTitle').value}</title>\n<meta name="description" content="${$('metaDesc').value}">\n<meta property="og:title" content="${$('metaTitle').value}">\n<meta property="og:description" content="${$('metaDesc').value}">\n<meta property="og:image" content="${$('metaOgImage').value}">\n<meta property="og:url" content="${$('metaUrl').value}">\n<meta name="twitter:card" content="summary_large_image">\n<meta name="twitter:title" content="${$('metaTitle').value}">\n<meta name="twitter:description" content="${$('metaDesc').value}">`;
+                navigator.clipboard.writeText(tags).then(() => showToast('✅ Meta tags copied to clipboard!'));
+            });
+
+            // ==================== 2. KEYWORD DENSITY CHECKER ====================
+            function analyzeKeywordDensity() {
+                const keyword = $('kdKeyword').value.trim().toLowerCase();
+                const content = $('kdContent').value.trim();
+                if (!keyword || !content) { showToast('⚠️ Please enter both keyword and content', 'warning'); return; }
+
+                const words = content.split(/\s+/).filter(w => w.length > 0);
+                const totalWords = words.length;
+                const keywordWords = keyword.split(/\s+/).filter(w => w.length > 0);
+                const keywordRegex = new RegExp(keywordWords.map(w => w.replace(/[.*+?^${}()|[\]\\]/g,
+                    '\\$&')).join('\\s+'), 'gi');
+                const matches = content.match(keywordRegex) || [];
+                const count = matches.length;
+                const density = totalWords > 0 ? ((count / totalWords) * 100) : 0;
+
+                // Single-word analysis
+                const wordFreq = {};
+                words.forEach(w => { const lw = w.toLowerCase().replace(/[^a-z0-9]/g, '');
+                    wordFreq[lw] = (wordFreq[lw] || 0) + 1; });
+                const sortedWords = Object.entries(wordFreq).filter(([w]) => w.length > 2).sort((a, b) => b[1] - a[
+                    1]).slice(0, 15);
+
+                const idealMin = keywordWords.length === 1 ? 1 : 0.5;
+                const idealMax = keywordWords.length === 1 ? 2.5 : 2;
+                const status = density < idealMin ? 'Low' : density > idealMax ? 'High (risk of stuffing)' :
+                    'Optimal';
+                const statusClass = density < idealMin ? 'yellow' : density > idealMax ? 'red' : 'green';
+
+                $('kdTotalWords').textContent = totalWords + ' words';
+                $('kdResults').innerHTML = `
+                    <div class="text-center mb-3">
+                        <h4 class="fw-bold">${density.toFixed(2)}%</h4>
+                        <span class="stat-badge ${statusClass}">${status}</span>
+                        <p class="small text-muted mt-1">Keyword "${keyword}" appears <strong>${count}</strong> time(s) in <strong>${totalWords}</strong> words</p>
+                        <p class="small text-muted">Formula: (${count} ÷ ${totalWords}) × 100 = ${density.toFixed(2)}% · Ideal: ${idealMin}-${idealMax}%</p>
+                    </div>
+                    <h6 class="small fw-bold text-muted">🔑 All Keyword Frequencies</h6>
+                    <div>${sortedWords.map(([w, c]) => `
+                        <div class="keyword-row">
+                            <span>${w}</span>
+                            <span><strong>${c}</strong> · ${((c/totalWords)*100).toFixed(1)}%</span>
+                        </div>`).join('')}</div>
+                `;
+            }
+
+            $('analyzeKDBtn').addEventListener('click', analyzeKeywordDensity);
+
+            // ==================== 3. READABILITY ANALYZER ====================
+            function countSyllables(word) {
+                word = word.toLowerCase().replace(/[^a-z]/g, '');
+                if (word.length <= 3) return 1;
+                word = word.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '');
+                word = word.replace(/^y/, '');
+                const matches = word.match(/[aeiouy]{1,2}/g);
+                return matches ? matches.length : 1;
+            }
+
+            function analyzeReadability() {
+                const text = $('readContent').value.trim();
+                if (!text) { showToast('⚠️ Please enter text to analyze', 'warning'); return; }
+
+                // Split into sentences
+                const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+                const words = text.split(/\s+/).filter(w => w.length > 0);
+                const totalSentences = sentences.length;
+                const totalWords = words.length;
+                const totalSyllables = words.reduce((sum, w) => sum + countSyllables(w), 0);
+
+                // Flesch Reading Ease
+                const asl = totalSentences > 0 ? totalWords / totalSentences : 0;
+                const asw = totalWords > 0 ? totalSyllables / totalWords : 0;
+                const fleschScore = 206.835 - (1.015 * asl) - (84.6 * asw);
+                const clampedScore = Math.max(0, Math.min(120, Math.round(fleschScore)));
+
+                // Flesch-Kincaid Grade Level
+                const fkGrade = (0.39 * asl) + (11.8 * asw) - 15.59;
+                const clampedGrade = Math.max(0, Math.round(fkGrade * 10) / 10);
+
+                // Interpretation
+                let level, levelColor, gradeLabel;
+                if (clampedScore >= 90) { level = 'Very Easy';
+                    levelColor = 'var(--success)';
+                    gradeLabel = '5th Grade'; } else if (clampedScore >= 80) { level = 'Easy';
+                    levelColor = 'var(--success)';
+                    gradeLabel = '6th Grade'; } else if (clampedScore >= 70) { level = 'Fairly Easy';
+                    levelColor = '#22c55e';
+                    gradeLabel = '7th Grade'; } else if (clampedScore >= 60) { level = 'Standard';
+                    levelColor = 'var(--warning)';
+                    gradeLabel = '8th-9th Grade'; } else if (clampedScore >= 50) { level = 'Fairly Difficult';
+                    levelColor = '#f97316';
+                    gradeLabel = '10th-12th Grade'; } else if (clampedScore >= 30) { level = 'Difficult';
+                    levelColor = 'var(--danger)';
+                    gradeLabel = 'College'; } else { level = 'Very Confusing';
+                    levelColor = 'var(--danger)';
+                    gradeLabel = 'College Graduate'; }
+
+                // Reading time
+                const readingTime = Math.max(1, Math.round(totalWords / 238));
+
+                $('readResults').innerHTML = `
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="score-circle ${clampedScore >= 60 ? 'good' : clampedScore >= 50 ? 'avg' : 'poor'}" style="width:90px;height:90px;font-size:1.6rem;">${clampedScore}</div>
+                            <small class="d-block mt-1 fw-bold">Flesch Reading Ease</small>
+                            <span class="stat-badge" style="background:${levelColor}20;color:${levelColor};">${level}</span>
+                        </div>
+                        <div class="col-6">
+                            <div class="fw-bold fs-4">${clampedGrade}</div>
+                            <small class="d-block mt-1 fw-bold">Grade Level</small>
+                            <span class="stat-badge green">${gradeLabel}</span>
+                        </div>
+                    </div>
+                    <hr class="my-2">
+                    <div class="row small text-muted">
+                        <div class="col-4"><strong>${totalWords}</strong><br>Words</div>
+                        <div class="col-4"><strong>${totalSentences}</strong><br>Sentences</div>
+                        <div class="col-4"><strong>${totalSyllables}</strong><br>Syllables</div>
+                    </div>
+                    <div class="row small text-muted mt-2">
+                        <div class="col-4"><strong>${asl.toFixed(1)}</strong><br>Avg Sentence Length</div>
+                        <div class="col-4"><strong>${asw.toFixed(1)}</strong><br>Avg Syllables/Word</div>
+                        <div class="col-4"><strong>~${readingTime} min</strong><br>Reading Time</div>
+                    </div>
+                `;
+            }
+
+            $('analyzeReadBtn').addEventListener('click', analyzeReadability);
+
+            // ==================== 4. ROBOTS.TXT GENERATOR ====================
+            const selectedBots = new Set();
+            document.querySelectorAll('#robotsBlockBots .badge').forEach(badge => {
+                badge.addEventListener('click', function() {
+                    const bot = this.dataset.bot;
+                    if (selectedBots.has(bot)) { selectedBots.delete(bot);
+                        this.classList.remove('bg-danger', 'text-white');
+                        this.classList.add('bg-light', 'text-dark'); } else { selectedBots.add(
+                        bot);
+                        this.classList.remove('bg-light', 'text-dark');
+                        this.classList.add('bg-danger', 'text-white'); }
+                });
+            });
+
+            function generateRobots() {
+                const url = $('robotsUrl').value.trim() || 'https://example.com';
+                const disallowPaths = $('robotsDisallow').value.split(',').map(p => p.trim()).filter(p => p);
+                const delay = parseInt($('robotsDelay').value) || 0;
+                let sitemapUrl = url.replace(/\/$/, '') + '/sitemap.xml';
+
+                let output = `# robots.txt generated by Ultimate SEO Tools\n# For: ${url}\n\nUser-agent: *\n`;
+                disallowPaths.forEach(p => output += `Disallow: ${p}\n`);
+                if (delay > 0) output += `Crawl-delay: ${delay}\n`;
+                output += `\nSitemap: ${sitemapUrl}\n`;
+
+                // Blocked AI bots
+                if (selectedBots.size > 0) {
+                    output += `\n# AI Crawler Blocks\n`;
+                    selectedBots.forEach(bot => {
+                        output += `User-agent: ${bot}\nDisallow: /\n\n`;
+                    });
+                }
+
+                output += `\n# Allow all other crawlers\nUser-agent: *\nAllow: /`;
+
+                $('robotsOutput').textContent = output;
+                showToast('✅ robots.txt generated!');
+            }
+
+            $('generateRobotsBtn').addEventListener('click', generateRobots);
+            $('copyRobotsBtn').addEventListener('click', () => {
+                const text = $('robotsOutput').textContent;
+                if (text.includes('Click')) { showToast('⚠️ Generate first', 'warning'); return; }
+                navigator.clipboard.writeText(text).then(() => showToast('✅ robots.txt copied!'));
+            });
+
+            // ==================== 5. JSON-LD SCHEMA GENERATOR ====================
+            const SCHEMA_FIELDS = {
+                Article: [
+                    { id: 'schHeadline', label: 'Headline', value: 'Sample Article Title' },
+                    { id: 'schAuthor', label: 'Author Name', value: 'John Doe' },
+                    { id: 'schDatePublished', label: 'Date Published', value: '2025-06-15' },
+                    { id: 'schDateModified', label: 'Date Modified', value: '2025-06-15' },
+                    { id: 'schImage', label: 'Image URL', value: 'https://example.com/image.jpg' },
+                    { id: 'schPublisher', label: 'Publisher Name', value: 'Example Blog' },
+                ],
+                FAQ: [
+                    { id: 'schFaqQ1', label: 'Question 1', value: 'What is SEO?' },
+                    { id: 'schFaqA1', label: 'Answer 1', value: 'SEO stands for Search Engine Optimization.' },
+                    { id: 'schFaqQ2', label: 'Question 2', value: 'How long does SEO take?' },
+                    { id: 'schFaqA2', label: 'Answer 2', value: 'SEO typically takes 3-6 months to show results.' },
+                ],
+                Product: [
+                    { id: 'schProdName', label: 'Product Name', value: 'Sample Product' },
+                    { id: 'schProdDesc', label: 'Description', value: 'A high-quality product.' },
+                    { id: 'schProdPrice', label: 'Price', value: '29.99' },
+                    { id: 'schProdCurrency', label: 'Currency', value: 'USD' },
+                    { id: 'schProdAvailability', label: 'Availability', value: 'InStock' },
+                ],
+                Organization: [
+                    { id: 'schOrgName', label: 'Organization Name', value: 'Acme Corp' },
+                    { id: 'schOrgUrl', label: 'Website URL', value: 'https://example.com' },
+                    { id: 'schOrgLogo', label: 'Logo URL', value: 'https://example.com/logo.png' },
+                    { id: 'schOrgSameAs', label: 'Social Profile', value: 'https://twitter.com/acme' },
+                ],
+                LocalBusiness: [
+                    { id: 'schBizName', label: 'Business Name', value: 'Acme Store' },
+                    { id: 'schBizAddress', label: 'Street Address', value: '123 Main St' },
+                    { id: 'schBizCity', label: 'City', value: 'New York' },
+                    { id: 'schBizState', label: 'State', value: 'NY' },
+                    { id: 'schBizPhone', label: 'Phone', value: '+1-555-0123' },
+                ],
+                BreadcrumbList: [
+                    { id: 'schBread1Name', label: 'Item 1 Name', value: 'Home' },
+                    { id: 'schBread1Url', label: 'Item 1 URL', value: 'https://example.com' },
+                    { id: 'schBread2Name', label: 'Item 2 Name', value: 'Blog' },
+                    { id: 'schBread2Url', label: 'Item 2 URL', value: 'https://example.com/blog' },
+                    { id: 'schBread3Name', label: 'Item 3 Name', value: 'SEO Tips' },
+                    { id: 'schBread3Url', label: 'Item 3 URL', value: 'https://example.com/blog/seo-tips' },
+                ],
+                HowTo: [
+                    { id: 'schHowName', label: 'How-To Name', value: 'How to Optimize SEO' },
+                    { id: 'schHowStep1', label: 'Step 1', value: 'Conduct keyword research' },
+                    { id: 'schHowStep2', label: 'Step 2', value: 'Optimize meta tags' },
+                    { id: 'schHowStep3', label: 'Step 3', value: 'Build quality backlinks' },
+                ],
+                Recipe: [
+                    { id: 'schRecipeName', label: 'Recipe Name', value: 'Chocolate Cake' },
+                    { id: 'schRecipeAuthor', label: 'Author', value: 'Jane Smith' },
+                    { id: 'schRecipeTime', label: 'Cook Time (ISO)', value: 'PT45M' },
+                    { id: 'schRecipeIng1', label: 'Ingredient 1', value: 'Flour' },
+                    { id: 'schRecipeIng2', label: 'Ingredient 2', value: 'Sugar' },
+                ],
+                Person: [
+                    { id: 'schPersonName', label: 'Full Name', value: 'John Doe' },
+                    { id: 'schPersonJob', label: 'Job Title', value: 'SEO Specialist' },
+                    { id: 'schPersonOrg', label: 'Organization', value: 'Acme Corp' },
+                    { id: 'schPersonUrl', label: 'Website', value: 'https://johndoe.com' },
+                ],
+            };
+
+            function renderSchemaFields() {
+                const type = $('schemaType').value;
+                const fields = SCHEMA_FIELDS[type] || SCHEMA_FIELDS['Article'];
+                $('schemaFields').innerHTML = fields.map(f => `
+                    <label class="form-label mt-2">${f.label}</label>
+                    <input type="text" class="form-control schema-field" id="${f.id}" value="${f.value}">
+                `).join('');
+            }
+
+            $('schemaType').addEventListener('change', renderSchemaFields);
+
+            function generateSchema() {
+                const type = $('schemaType').value;
+                const fields = document.querySelectorAll('.schema-field');
+                const values = {};
+                fields.forEach(f => { values[f.id] = f.value; });
+
+                let jsonLd = { '@context': 'https://schema.org', '@type': type };
+
+                switch (type) {
+                    case 'Article':
+                        jsonLd.headline = values.schHeadline;
+                        jsonLd.author = { '@type': 'Person', name: values.schAuthor };
+                        jsonLd.datePublished = values.schDatePublished;
+                        jsonLd.dateModified = values.schDateModified;
+                        jsonLd.image = values.schImage;
+                        jsonLd.publisher = { '@type': 'Organization', name: values.schPublisher };
+                        break;
+                    case 'FAQ':
+                        jsonLd.mainEntity = [
+                            { '@type': 'Question', name: values.schFaqQ1,
+                                acceptedAnswer: { '@type': 'Answer', text: values.schFaqA1 } },
+                            { '@type': 'Question', name: values.schFaqQ2,
+                                acceptedAnswer: { '@type': 'Answer', text: values.schFaqA2 } },
+                        ];
+                        break;
+                    case 'Product':
+                        jsonLd.name = values.schProdName;
+                        jsonLd.description = values.schProdDesc;
+                        jsonLd.offers = { '@type': 'Offer', price: values.schProdPrice,
+                            priceCurrency: values.schProdCurrency,
+                            availability: 'https://schema.org/' + values.schProdAvailability };
+                        break;
+                    case 'Organization':
+                        jsonLd.name = values.schOrgName;
+                        jsonLd.url = values.schOrgUrl;
+                        jsonLd.logo = values.schOrgLogo;
+                        jsonLd.sameAs = [values.schOrgSameAs];
+                        break;
+                    case 'LocalBusiness':
+                        jsonLd.name = values.schBizName;
+                        jsonLd.address = { '@type': 'PostalAddress', streetAddress: values.schBizAddress,
+                            addressLocality: values.schBizCity, addressRegion: values.schBizState,
+                            addressCountry: 'US' };
+                        jsonLd.telephone = values.schBizPhone;
+                        break;
+                    case 'BreadcrumbList':
+                        jsonLd.itemListElement = [
+                            { '@type': 'ListItem', position: 1, name: values.schBread1Name,
+                            item: values.schBread1Url },
+                            { '@type': 'ListItem', position: 2, name: values.schBread2Name,
+                                item: values.schBread2Url },
+                            { '@type': 'ListItem', position: 3, name: values.schBread3Name,
+                                item: values.schBread3Url },
+                        ];
+                        break;
+                    case 'HowTo':
+                        jsonLd.name = values.schHowName;
+                        jsonLd.step = [
+                            { '@type': 'HowToStep', position: 1, text: values.schHowStep1 },
+                            { '@type': 'HowToStep', position: 2, text: values.schHowStep2 },
+                            { '@type': 'HowToStep', position: 3, text: values.schHowStep3 },
+                        ];
+                        break;
+                    case 'Recipe':
+                        jsonLd.name = values.schRecipeName;
+                        jsonLd.author = { '@type': 'Person', name: values.schRecipeAuthor };
+                        jsonLd.cookTime = values.schRecipeTime;
+                        jsonLd.recipeIngredient = [values.schRecipeIng1, values.schRecipeIng2];
+                        break;
+                    case 'Person':
+                        jsonLd.name = values.schPersonName;
+                        jsonLd.jobTitle = values.schPersonJob;
+                        jsonLd.worksFor = { '@type': 'Organization', name: values.schPersonOrg };
+                        jsonLd.url = values.schPersonUrl;
+                        break;
+                }
+
+                $('schemaOutput').textContent = JSON.stringify(jsonLd, null, 2);
+                showToast('✅ JSON-LD generated!');
+            }
+
+            $('generateSchemaBtn').addEventListener('click', generateSchema);
+            $('copySchemaBtn').addEventListener('click', () => {
+                const text = $('schemaOutput').textContent;
+                if (text === '{ }') { showToast('⚠️ Generate first', 'warning'); return; }
+                navigator.clipboard.writeText(text).then(() => showToast('✅ JSON-LD copied!'));
+            });
+            $('downloadSchemaBtn').addEventListener('click', () => {
+                const text = $('schemaOutput').textContent;
+                if (text === '{ }') { showToast('⚠️ Generate first', 'warning'); return; }
+                const blob = new Blob([text], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'structured-data.json';
+                a.click();
+                URL.revokeObjectURL(url);
+                showToast('📥 Downloaded structured-data.json');
+            });
+
+            // ==================== 6. SEO SCORE CARD ====================
+            $('scoreImgAlt').addEventListener('input', () => {
+                $('scoreImgAltLabel').textContent = $('scoreImgAlt').value + '%';
+            });
+
+            function calculateScore() {
+                const title = $('scoreTitle').value.trim();
+                const desc = $('scoreDesc').value.trim();
+                const headingsRaw = $('scoreHeadings').value.trim();
+                const wordCount = parseInt($('scoreWordCount').value) || 0;
+                const internalLinks = parseInt($('scoreInternalLinks').value) || 0;
+                const imgAltPct = parseInt($('scoreImgAlt').value) || 0;
+
+                // Parse headings
+                const headingLines = headingsRaw.split('\n').filter(l => l.trim());
+                const h1Count = headingLines.filter(l => l.match(/^H1[:：]/i)).length;
+                const h2Count = headingLines.filter(l => l.match(/^H2[:：]/i)).length;
+                const h3Count = headingLines.filter(l => l.match(/^H3[:：]/i)).length;
+                const totalHeadings = headingLines.length;
+
+                // --- Scoring ---
+                // 1. Title (15%)
+                const titleScore = title.length >= 30 && title.length <= 60 ? 15 : title.length >= 20 && title
+                    .length <= 70 ? 10 : title.length > 0 ? 5 : 0;
+
+                // 2. Meta Description (10%)
+                const descScore = desc.length >= 120 && desc.length <= 160 ? 10 : desc.length >= 80 && desc.length <=
+                    200 ? 6 : desc.length > 0 ? 3 : 0;
+
+                // 3. Heading Structure (15%)
+                let headingScore = 0;
+                if (h1Count === 1) headingScore += 7;
+                else if (h1Count > 1) headingScore += 3;
+                if (h2Count >= 2) headingScore += 5;
+                else if (h2Count === 1) headingScore += 3;
+                if (h3Count >= 1) headingScore += 3;
+                headingScore = Math.min(15, headingScore);
+
+                // 4. Content Depth (25%)
+                let contentScore = 0;
+                if (wordCount >= 1500) contentScore += 25;
+                else if (wordCount >= 1000) contentScore += 20;
+                else if (wordCount >= 500) contentScore += 13;
+                else if (wordCount >= 200) contentScore += 6;
+                else contentScore += 2;
+
+                // 5. Internal Links (15%)
+                let linkScore = 0;
+                if (internalLinks >= 5) linkScore += 15;
+                else if (internalLinks >= 3) linkScore += 10;
+                else if (internalLinks >= 1) linkScore += 5;
+
+                // 6. Image Alt Text (10%)
+                const imgScore = Math.round((imgAltPct / 100) * 10);
+
+                // 7. Mobile/UX Readiness (10%) — heuristic based on content quality
+                const uxScore = wordCount >= 500 && desc.length >= 80 ? 10 : wordCount >= 300 ? 6 : 3;
+
+                const totalScore = titleScore + descScore + headingScore + contentScore + linkScore + imgScore +
+                    uxScore;
+                const grade = totalScore >= 80 ? 'A' : totalScore >= 65 ? 'B' : totalScore >= 50 ? 'C' :
+                    totalScore >= 35 ? 'D' : 'F';
+                const gradeColor = totalScore >= 80 ? 'good' : totalScore >= 65 ? 'good' : totalScore >= 50 ?
+                    'avg' : 'poor';
+
+                const issues = [];
+                if (titleScore < 12) issues.push(
+                    '📝 Title tag needs optimization (aim for 30-60 characters with your primary keyword)');
+                if (descScore < 7) issues.push(
+                    '📋 Meta description should be 120-160 characters with a compelling CTA');
+                if (h1Count !== 1) issues.push(
+                    h1Count === 0 ? '⚠️ Missing H1 heading — every page needs exactly one H1' :
+                    '⚠️ Multiple H1 tags detected — use only one H1 per page');
+                if (h2Count < 2) issues.push(
+                    '📑 Consider adding more H2 subheadings to structure your content');
+                if (wordCount < 1000) issues.push(
+                    '📖 Content is thin — aim for 1000+ words for comprehensive topical coverage');
+                if (internalLinks < 3) issues.push(
+                    '🔗 Add more internal links (3-5 minimum) to improve site structure');
+                if (imgAltPct < 80) issues.push('🖼️ Add alt text to more images (target 100% coverage)');
+
+                $('scoreResults').innerHTML = `
+                    <div class="row align-items-center">
+                        <div class="col-5">
+                            <div class="score-circle ${gradeColor}">${totalScore}</div>
+                            <small class="d-block mt-1 fw-bold">Grade: <span class="fs-5">${grade}</span></small>
+                            <span class="stat-badge ${gradeColor === 'good' ? 'green' : gradeColor === 'avg' ? 'yellow' : 'red'}">${gradeColor === 'good' ? 'Good' : gradeColor === 'avg' ? 'Needs Work' : 'Poor'}</span>
+                        </div>
+                        <div class="col-7 text-start small">
+                            <div class="d-flex justify-content-between"><span>Title</span><strong>${titleScore}/15</strong></div>
+                            <div class="d-flex justify-content-between"><span>Meta Description</span><strong>${descScore}/10</strong></div>
+                            <div class="d-flex justify-content-between"><span>Heading Structure</span><strong>${headingScore}/15</strong></div>
+                            <div class="d-flex justify-content-between"><span>Content Depth</span><strong>${contentScore}/25</strong></div>
+                            <div class="d-flex justify-content-between"><span>Internal Links</span><strong>${linkScore}/15</strong></div>
+                            <div class="d-flex justify-content-between"><span>Image Alt Text</span><strong>${imgScore}/10</strong></div>
+                            <div class="d-flex justify-content-between"><span>UX Readiness</span><strong>${uxScore}/10</strong></div>
+                        </div>
+                    </div>
+                    ${issues.length > 0 ? `<hr class="my-2"><div class="text-start small">${issues.map(i => `<p class="mb-1">${i}</p>`).join('')}</div>` : ''}
+                `;
+            }
+
+            $('calculateScoreBtn').addEventListener('click', calculateScore);
+
+            // ==================== INITIALIZATION ====================
+            function init() {
+                updateMetaPreview();
+                renderSchemaFields();
+                generateSchema();
+                console.log('✅ Ultimate SEO Tools initialized.');
+                console.log('   Modules: Meta & SERP · Keyword Density · Readability · Robots.txt · Schema · Score Card');
+                console.log('   Research: Yoast Flesch-Kincaid · SISTRIX Pixel Limits · Google Robots RFC · Schema.org · RankMath');
+                console.log('   Privacy: All processing in browser. No data uploaded.');
+            }
+
+            init();
+        })();
+    </script>
+</body>
+</html>
