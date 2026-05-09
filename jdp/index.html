@@ -1,0 +1,1580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON DevTool Pro</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --surface: #161b22;
+            --surface2: #1c2333;
+            --border: #30363d;
+            --text: #e6edf3;
+            --text2: #b0b8c4;
+            --text3: #6e7681;
+            --accent: #58a6ff;
+            --accent2: #3fb950;
+            --string: #a5d6ff;
+            --number: #ffa657;
+            --boolean: #ff7b72;
+            --null: #8b949e;
+            --key: #d2a8ff;
+            --bracket: #e6edf3;
+            --error: #f85149;
+            --error-bg: #49020233;
+            --warn: #d2991d;
+            --glass: rgba(22, 27, 34, 0.85);
+            --glass-border: rgba(48, 54, 61, 0.7);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --radius: 12px;
+            --radius-sm: 8px;
+            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --font-mono: 'SF Mono', 'Cascadia Code', 'JetBrains Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
+            --font-sans: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --editor-bg: #0d1117;
+            --tree-bg: #0d1117;
+            --highlight-search: rgba(88, 166, 255, 0.35);
+            --highlight-current: rgba(255, 165, 0, 0.55);
+            --toggle-bg: #21262d;
+            --btn-hover: #30363d;
+            --scrollbar-thumb: #30363d;
+            --scrollbar-track: #161b22;
+        }
+        :root.light-mode {
+            --bg: #f6f8fa;
+            --surface: #ffffff;
+            --surface2: #f0f2f5;
+            --border: #d0d7de;
+            --text: #1f2328;
+            --text2: #656d76;
+            --text3: #8c959f;
+            --accent: #0969da;
+            --accent2: #1a7f37;
+            --string: #0a3069;
+            --number: #953800;
+            --boolean: #cf222e;
+            --null: #6e7781;
+            --key: #8250df;
+            --bracket: #1f2328;
+            --error: #cf222e;
+            --error-bg: #ffebe9;
+            --warn: #9a6700;
+            --glass: rgba(255, 255, 255, 0.8);
+            --glass-border: rgba(208, 215, 222, 0.6);
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --editor-bg: #fafbfc;
+            --tree-bg: #fafbfc;
+            --highlight-search: rgba(9, 105, 218, 0.25);
+            --highlight-current: rgba(255, 140, 0, 0.4);
+            --toggle-bg: #e8eaed;
+            --btn-hover: #e8eaed;
+            --scrollbar-thumb: #c0c6cc;
+            --scrollbar-track: #f0f2f5;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            font-family: var(--font-sans);
+            background: var(--bg);
+            color: var(--text);
+            transition: background var(--transition), color var(--transition);
+        }
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--scrollbar-track);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--scrollbar-thumb);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text3);
+        }
+
+        /* App Container */
+        #app {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        /* Header */
+        #header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+            gap: 10px;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+            transition: background var(--transition), border var(--transition);
+        }
+        #header .logo {
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: -0.3px;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text);
+        }
+        #header .logo .icon {
+            font-size: 1.4rem;
+        }
+        #header .actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .btn {
+            padding: 7px 13px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            background: var(--toggle-bg);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 500;
+            font-family: var(--font-sans);
+            white-space: nowrap;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            letter-spacing: -0.1px;
+        }
+        .btn:hover {
+            background: var(--btn-hover);
+            border-color: var(--text3);
+        }
+        .btn:active {
+            transform: scale(0.96);
+            opacity: 0.85;
+        }
+        .btn.accent {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+            font-weight: 600;
+        }
+        .btn.accent:hover {
+            filter: brightness(1.15);
+        }
+        .btn.danger {
+            border-color: var(--error);
+            color: var(--error);
+        }
+        .btn.danger:hover {
+            background: var(--error-bg);
+        }
+        .btn.small {
+            padding: 4px 9px;
+            font-size: 0.7rem;
+            border-radius: 6px;
+        }
+        .btn-icon {
+            padding: 7px 9px;
+            min-width: 34px;
+            justify-content: center;
+        }
+
+        /* Search Bar */
+        #search-container {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            transition: all var(--transition);
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        #search-container.active {
+            opacity: 1;
+            max-height: 52px;
+            pointer-events: all;
+        }
+        #search-input {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            background: var(--editor-bg);
+            color: var(--text);
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            outline: none;
+            transition: all var(--transition);
+        }
+        #search-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1);
+        }
+        #search-count {
+            font-size: 0.75rem;
+            color: var(--text2);
+            white-space: nowrap;
+            min-width: 40px;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+            font-family: var(--font-mono);
+        }
+        .search-nav-btn {
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--toggle-bg);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all var(--transition);
+        }
+        .search-nav-btn:hover {
+            background: var(--btn-hover);
+        }
+
+        /* Main Layout */
+        #main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+        #divider {
+            width: 4px;
+            background: var(--border);
+            cursor: col-resize;
+            flex-shrink: 0;
+            transition: background var(--transition);
+            z-index: 5;
+        }
+        #divider:hover,
+        #divider.dragging {
+            background: var(--accent);
+            width: 4px;
+        }
+        .panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-width: 0;
+        }
+        .panel-header {
+            padding: 8px 14px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text3);
+            background: var(--surface2);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            transition: all var(--transition);
+        }
+        .panel-header .badge {
+            font-size: 0.65rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: var(--toggle-bg);
+            color: var(--text2);
+            font-weight: 500;
+            letter-spacing: 0;
+        }
+        .panel-header .badge.error-badge {
+            background: var(--error-bg);
+            color: var(--error);
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.6;
+            }
+        }
+        #editor-panel {
+            flex: 1 1 50%;
+        }
+        #tree-panel {
+            flex: 1 1 50%;
+        }
+        #editor {
+            flex: 1;
+            width: 100%;
+            padding: 16px;
+            border: none;
+            resize: none;
+            background: var(--editor-bg);
+            color: var(--text);
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            line-height: 1.6;
+            tab-size: 2;
+            outline: none;
+            transition: background var(--transition), color var(--transition);
+        }
+        #tree-container {
+            flex: 1;
+            overflow: auto;
+            padding: 12px 16px;
+            background: var(--tree-bg);
+            font-family: var(--font-mono);
+            font-size: 0.82rem;
+            line-height: 1.7;
+            transition: background var(--transition);
+            position: relative;
+        }
+        #error-panel {
+            flex-shrink: 0;
+            background: var(--error-bg);
+            border-top: 1px solid rgba(248, 81, 73, 0.3);
+            padding: 10px 16px;
+            font-size: 0.78rem;
+            color: var(--error);
+            font-family: var(--font-mono);
+            display: none;
+            max-height: 80px;
+            overflow-y: auto;
+            transition: all var(--transition);
+            line-height: 1.5;
+        }
+        #error-panel.visible {
+            display: block;
+        }
+
+        /* Tree Nodes */
+        .tree-node {
+            position: relative;
+            user-select: none;
+        }
+        .tree-line {
+            display: flex;
+            align-items: flex-start;
+            padding: 1px 0;
+            cursor: default;
+            border-radius: 3px;
+            transition: background 0.1s;
+            min-height: 22px;
+        }
+        .tree-line:hover {
+            background: rgba(128, 128, 128, 0.06);
+        }
+        .tree-line.search-match {
+            background: var(--highlight-search);
+            border-radius: 4px;
+            outline: 1px solid rgba(88, 166, 255, 0.4);
+        }
+        .tree-line.search-current {
+            background: var(--highlight-current) !important;
+            outline: 2px solid var(--accent) !important;
+            z-index: 2;
+        }
+        .tree-toggle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            flex-shrink: 0;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            color: var(--text3);
+            transition: all var(--transition);
+            margin-right: 2px;
+            user-select: none;
+        }
+        .tree-toggle:hover {
+            color: var(--text);
+            background: var(--toggle-bg);
+        }
+        .tree-toggle.collapsed {
+            transform: rotate(-90deg);
+        }
+        .tree-toggle.leaf {
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .tree-children {
+            padding-left: 20px;
+            overflow: hidden;
+            transition: max-height 0.25s ease, opacity 0.2s ease;
+            max-height: 99999px;
+            opacity: 1;
+        }
+        .tree-children.collapsed {
+            max-height: 0;
+            opacity: 0;
+        }
+        .tree-key {
+            color: var(--key);
+            font-weight: 500;
+        }
+        .tree-string {
+            color: var(--string);
+        }
+        .tree-number {
+            color: var(--number);
+        }
+        .tree-boolean {
+            color: var(--boolean);
+            font-weight: 600;
+        }
+        .tree-null {
+            color: var(--null);
+            font-style: italic;
+        }
+        .tree-bracket {
+            color: var(--bracket);
+            font-weight: 600;
+        }
+        .tree-type-badge {
+            display: inline-block;
+            font-size: 0.6rem;
+            padding: 1px 7px;
+            border-radius: 8px;
+            background: var(--toggle-bg);
+            color: var(--text3);
+            margin-left: 6px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            vertical-align: middle;
+            text-transform: uppercase;
+        }
+        .tree-count {
+            color: var(--text3);
+            font-size: 0.72rem;
+            margin-left: 4px;
+            font-weight: 400;
+        }
+        .tree-ellipsis {
+            color: var(--text3);
+            font-style: italic;
+        }
+
+        /* Toast */
+        #toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            padding: 10px 18px;
+            border-radius: var(--radius-sm);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-size: 0.8rem;
+            font-weight: 500;
+            box-shadow: var(--shadow);
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none;
+            transition: all 0.3s ease;
+            font-family: var(--font-sans);
+        }
+        #toast.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
+        }
+        #toast.success {
+            border-color: var(--accent2);
+            color: var(--accent2);
+        }
+        #toast.error {
+            border-color: var(--error);
+            color: var(--error);
+        }
+
+        /* Drop overlay */
+        #drop-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9998;
+            background: rgba(13, 17, 23, 0.7);
+            backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.25s;
+        }
+        #drop-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        #drop-overlay .drop-msg {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+            background: var(--surface);
+            padding: 32px 48px;
+            border-radius: var(--radius);
+            border: 3px dashed var(--accent);
+            text-align: center;
+            letter-spacing: -0.5px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            #main {
+                flex-direction: column;
+            }
+            #divider {
+                width: 100%;
+                height: 4px;
+                cursor: row-resize;
+            }
+            #editor-panel {
+                flex: 1 1 40%;
+                min-height: 150px;
+            }
+            #tree-panel {
+                flex: 1 1 60%;
+                min-height: 200px;
+            }
+            .btn span.btn-label {
+                display: none;
+            }
+            .btn {
+                padding: 7px 10px;
+                font-size: 0.75rem;
+            }
+            #header {
+                padding: 8px 10px;
+                gap: 4px;
+            }
+            #header .logo {
+                font-size: 0.9rem;
+            }
+            #search-container {
+                padding: 6px 10px;
+            }
+            #search-container.active {
+                max-height: 44px;
+            }
+            #search-input {
+                font-size: 0.75rem;
+            }
+        }
+        @media (max-width: 480px) {
+            #header .actions {
+                gap: 3px;
+            }
+            .btn {
+                padding: 5px 7px;
+                font-size: 0.7rem;
+                border-radius: 5px;
+            }
+            #editor {
+                font-size: 0.75rem;
+                padding: 10px;
+            }
+            #tree-container {
+                font-size: 0.72rem;
+                padding: 8px 10px;
+            }
+            .tree-children {
+                padding-left: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <div id="header">
+            <div class="logo">
+                <span class="icon">{ }</span> JSON DevTool Pro
+            </div>
+            <div class="actions">
+                <button class="btn small" id="btn-format" title="Format JSON (Ctrl+Shift+F)">✨<span class="btn-label"> Format</span></button>
+                <button class="btn small" id="btn-minify" title="Minify JSON (Ctrl+Shift+M)">📦<span class="btn-label"> Minify</span></button>
+                <button class="btn small" id="btn-fix" title="AI Fix JSON">🪄<span class="btn-label"> Fix</span></button>
+                <button class="btn small" id="btn-copy" title="Copy formatted JSON">📋<span class="btn-label"> Copy</span></button>
+                <button class="btn small" id="btn-download-pretty" title="Download pretty JSON (Ctrl+S)">💾<span class="btn-label"> Save</span></button>
+                <button class="btn small" id="btn-download-min" title="Download minified JSON">🗜️<span class="btn-label"> Min</span></button>
+                <button class="btn small" id="btn-upload" title="Upload JSON file">📁<span class="btn-label"> Open</span></button>
+                <button class="btn small" id="btn-api" title="Fetch from API">🌐<span class="btn-label"> API</span></button>
+                <button class="btn small" id="btn-collapse-all" title="Collapse all nodes">⊟</button>
+                <button class="btn small" id="btn-expand-all" title="Expand all nodes">⊞</button>
+                <button class="btn small btn-icon" id="btn-theme" title="Toggle dark/light mode">🌓</button>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div id="search-container">
+            <input type="text" id="search-input" placeholder="Search keys & values... (Ctrl+F)" autocomplete="off">
+            <span id="search-count">0/0</span>
+            <button class="search-nav-btn" id="btn-search-prev" title="Previous match">▲</button>
+            <button class="search-nav-btn" id="btn-search-next" title="Next match">▼</button>
+            <button class="btn small" id="btn-search-close">✕</button>
+        </div>
+
+        <!-- Main Content -->
+        <div id="main">
+            <div class="panel" id="editor-panel">
+                <div class="panel-header">
+                    <span>📝 JSON Editor</span>
+                    <span class="badge" id="editor-badge">JSON</span>
+                </div>
+                <textarea id="editor" placeholder='Paste or type JSON here...&#10;Example: {"name": "World", "items": [1, 2, 3]}' spellcheck="false"></textarea>
+                <div id="error-panel"></div>
+            </div>
+            <div id="divider"></div>
+            <div class="panel" id="tree-panel">
+                <div class="panel-header">
+                    <span>🌳 Tree Viewer</span>
+                    <span class="badge" id="tree-badge">Ready</span>
+                </div>
+                <div id="tree-container">
+                    <span style="color:var(--text3);">Enter JSON on the left to see the tree view...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast -->
+        <div id="toast"></div>
+
+        <!-- Drop Overlay -->
+        <div id="drop-overlay"><div class="drop-msg">📂 Drop JSON file here</div></div>
+
+        <!-- Hidden file input -->
+        <input type="file" id="file-input" accept=".json,application/json" style="display:none;">
+    </div>
+
+    <script>
+        (function() {
+            // ──────────────────────────────────────
+            // DOM References
+            // ──────────────────────────────────────
+            const $editor = document.getElementById('editor');
+            const $treeContainer = document.getElementById('tree-container');
+            const $errorPanel = document.getElementById('error-panel');
+            const $searchContainer = document.getElementById('search-container');
+            const $searchInput = document.getElementById('search-input');
+            const $searchCount = document.getElementById('search-count');
+            const $editorBadge = document.getElementById('editor-badge');
+            const $treeBadge = document.getElementById('tree-badge');
+            const $toast = document.getElementById('toast');
+            const $dropOverlay = document.getElementById('drop-overlay');
+            const $fileInput = document.getElementById('file-input');
+            const $divider = document.getElementById('divider');
+            const $main = document.getElementById('main');
+
+            // ──────────────────────────────────────
+            // State
+            // ──────────────────────────────────────
+            let currentJSON = null; // Parsed JS object (or null if invalid)
+            let currentJSONString = ''; // The raw formatted string
+            let parseError = null;
+            let searchResults = [];
+            let searchIndex = -1;
+            let treeNodeElements = []; // Flat list of all tree-line elements for search
+            let allTreeNodesExpanded = true;
+            let isDarkMode = true;
+            const DEBOUNCE_MS = 300;
+            let debounceTimer = null;
+
+            // ──────────────────────────────────────
+            // Toast
+            // ──────────────────────────────────────
+            function showToast(msg, type = '') {
+                $toast.textContent = msg;
+                $toast.className = 'show ' + type;
+                clearTimeout($toast._timeout);
+                $toast._timeout = setTimeout(() => {
+                    $toast.className = '';
+                }, 1800);
+            }
+
+            // ──────────────────────────────────────
+            // JSON Processing Engine
+            // ──────────────────────────────────────
+            function safeParse(str) {
+                if (!str || !str.trim()) return { data: null, error: null };
+                try {
+                    const data = JSON.parse(str);
+                    return { data, error: null };
+                } catch (e) {
+                    return { data: null, error: e.message };
+                }
+            }
+
+            function formatJSON(obj, indent = 2) {
+                try {
+                    return JSON.stringify(obj, null, indent);
+                } catch (e) {
+                    return '';
+                }
+            }
+
+            function minifyJSON(obj) {
+                try {
+                    return JSON.stringify(obj);
+                } catch (e) {
+                    return '';
+                }
+            }
+
+            function validateAndGetError(str) {
+                if (!str || !str.trim()) return 'Empty input';
+                try {
+                    JSON.parse(str);
+                    return null;
+                } catch (e) {
+                    return e.message;
+                }
+            }
+
+            // ──────────────────────────────────────
+            // AI JSON Fixer Engine
+            // ──────────────────────────────────────
+            function aiFixJSON(str) {
+                if (!str || !str.trim()) return { result: str, fixes: [] };
+                let working = str;
+                const fixes = [];
+
+                // 1. Remove JavaScript comments
+                const commentCount = (working.match(/\/\/.*$/gm) || []).length + (working.match(/\/\*[\s\S]*?\*\//g) || [])
+                    .length;
+                if (commentCount > 0) {
+                    working = working.replace(/\/\/.*$/gm, '');
+                    working = working.replace(/\/\*[\s\S]*?\*\//g, '');
+                    fixes.push(`Removed ${commentCount} comment(s)`);
+                }
+
+                // 2. Fix single quotes (carefully — only outside double-quoted strings)
+                // Simple heuristic: replace all single quotes with double quotes
+                const singleQuoteMatches = working.match(/(?<!\\)'/g);
+                if (singleQuoteMatches && singleQuoteMatches.length > 0) {
+                    // Check if it looks like single-quoted JSON
+                    if (working.includes("'") && !working.includes('"')) {
+                        working = working.replace(/'/g, '"');
+                        fixes.push('Converted single quotes to double quotes');
+                    }
+                }
+
+                // 3. Remove trailing commas
+                const trailingCommaRegex = /,(\s*[}\]])/g;
+                if (trailingCommaRegex.test(working)) {
+                    const count = (working.match(trailingCommaRegex) || []).length;
+                    working = working.replace(trailingCommaRegex, '$1');
+                    fixes.push(`Removed ${count} trailing comma(s)`);
+                }
+
+                // 4. Fix missing commas between array items (heuristic)
+                // Look for patterns like: "value"\s*\n\s*"key" or ]\s*\n\s*\[ or }\s*\n\s*{
+                const missingCommaRegex1 = /(["\]}\d])\s*\n\s*(["\[{])/g;
+                if (missingCommaRegex1.test(working)) {
+                    working = working.replace(missingCommaRegex1, '$1,\n$2');
+                    fixes.push('Added missing commas between items');
+                }
+
+                // 5. Fix unquoted keys
+                const unquotedKeyRegex = /([{,]\s*)([a-zA-Z_$][a-zA-Z0-9_$]*)\s*:/g;
+                let unquotedCount = 0;
+                working = working.replace(unquotedKeyRegex, (match, prefix, key) => {
+                    unquotedCount++;
+                    return `${prefix}"${key}":`;
+                });
+                if (unquotedCount > 0) {
+                    fixes.push(`Quoted ${unquotedCount} unquoted key(s)`);
+                }
+
+                // 6. Try to balance brackets
+                const openBraces = (working.match(/\{/g) || []).length;
+                const closeBraces = (working.match(/\}/g) || []).length;
+                const openBrackets = (working.match(/\[/g) || []).length;
+                const closeBrackets = (working.match(/\]/g) || []).length;
+                if (openBraces > closeBraces) {
+                    working += '\n' + '}'.repeat(openBraces - closeBraces);
+                    fixes.push(`Added ${openBraces - closeBraces} closing brace(s)`);
+                }
+                if (openBrackets > closeBrackets) {
+                    working += '\n' + ']'.repeat(openBrackets - closeBrackets);
+                    fixes.push(`Added ${openBrackets - closeBrackets} closing bracket(s)`);
+                }
+                if (closeBraces > openBraces) {
+                    working = '{'.repeat(closeBraces - openBraces) + '\n' + working;
+                    fixes.push(`Added ${closeBraces - openBraces} opening brace(s)`);
+                }
+                if (closeBrackets > openBrackets) {
+                    working = '['.repeat(closeBrackets - openBrackets) + '\n' + working;
+                    fixes.push(`Added ${closeBrackets - openBrackets} opening bracket(s)`);
+                }
+
+                // 7. Remove extra commas at start of objects/arrays
+                working = working.replace(/([\[{])\s*,/g, '$1');
+                // 8. Double commas
+                if (working.includes(',,')) {
+                    const dc = (working.match(/,,/g) || []).length;
+                    working = working.replace(/,+/g, ',');
+                    fixes.push(`Fixed ${dc} double comma(s)`);
+                }
+
+                return { result: working.trim(), fixes };
+            }
+
+            // ──────────────────────────────────────
+            // Tree Renderer
+            // ──────────────────────────────────────
+            function renderTree(obj, container) {
+                container.innerHTML = '';
+                treeNodeElements = [];
+                if (obj === null || obj === undefined) {
+                    container.innerHTML =
+                        '<span style="color:var(--text3);">No valid JSON to display</span>';
+                    return;
+                }
+                const rootWrapper = document.createElement('div');
+                rootWrapper.className = 'tree-node';
+                const fragment = document.createDocumentFragment();
+                buildTreeNode('root', obj, fragment, 0, true);
+                rootWrapper.appendChild(fragment);
+                container.appendChild(rootWrapper);
+                updateTreeBadge(obj);
+            }
+
+            function buildTreeNode(key, value, parentEl, depth, isRoot = false) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'tree-node';
+                wrapper.dataset.depth = depth;
+
+                const line = document.createElement('div');
+                line.className = 'tree-line';
+                line.dataset.key = String(key);
+                line.dataset.depth = depth;
+
+                const toggle = document.createElement('span');
+                toggle.className = 'tree-toggle';
+
+                const contentSpan = document.createElement('span');
+                contentSpan.className = 'tree-content';
+
+                const isObject = value !== null && typeof value === 'object' && !Array.isArray(value);
+                const isArray = Array.isArray(value);
+                const isExpandable = isObject || isArray;
+                const isEmpty = isExpandable && Object.keys(value).length === 0;
+
+                if (isExpandable && !isEmpty) {
+                    toggle.textContent = '▼';
+                    toggle.classList.remove('leaf', 'collapsed');
+                } else if (isExpandable && isEmpty) {
+                    toggle.classList.add('leaf');
+                } else {
+                    toggle.classList.add('leaf');
+                }
+                line.appendChild(toggle);
+
+                // Build the display content
+                if (!isRoot) {
+                    const keySpan = document.createElement('span');
+                    keySpan.className = 'tree-key';
+                    keySpan.textContent = JSON.stringify(String(key)) + ': ';
+                    contentSpan.appendChild(keySpan);
+                }
+
+                if (isArray) {
+                    const bracketOpen = document.createElement('span');
+                    bracketOpen.className = 'tree-bracket';
+                    bracketOpen.textContent = '[';
+                    contentSpan.appendChild(bracketOpen);
+                    if (isEmpty) {
+                        const bracketClose = document.createElement('span');
+                        bracketClose.className = 'tree-bracket';
+                        bracketClose.textContent = ']';
+                        contentSpan.appendChild(bracketClose);
+                    }
+                    const typeBadge = document.createElement('span');
+                    typeBadge.className = 'tree-type-badge';
+                    typeBadge.textContent = `array[${value.length}]`;
+                    contentSpan.appendChild(typeBadge);
+                } else if (isObject) {
+                    const braceOpen = document.createElement('span');
+                    braceOpen.className = 'tree-bracket';
+                    braceOpen.textContent = '{';
+                    contentSpan.appendChild(braceOpen);
+                    if (isEmpty) {
+                        const braceClose = document.createElement('span');
+                        braceClose.className = 'tree-bracket';
+                        braceClose.textContent = '}';
+                        contentSpan.appendChild(braceClose);
+                    }
+                    const typeBadge = document.createElement('span');
+                    typeBadge.className = 'tree-type-badge';
+                    typeBadge.textContent = `object{${Object.keys(value).length}}`;
+                    contentSpan.appendChild(typeBadge);
+                } else if (typeof value === 'string') {
+                    const span = document.createElement('span');
+                    span.className = 'tree-string';
+                    span.textContent = JSON.stringify(value);
+                    contentSpan.appendChild(span);
+                } else if (typeof value === 'number') {
+                    const span = document.createElement('span');
+                    span.className = 'tree-number';
+                    span.textContent = String(value);
+                    contentSpan.appendChild(span);
+                } else if (typeof value === 'boolean') {
+                    const span = document.createElement('span');
+                    span.className = 'tree-boolean';
+                    span.textContent = String(value);
+                    contentSpan.appendChild(span);
+                } else if (value === null) {
+                    const span = document.createElement('span');
+                    span.className = 'tree-null';
+                    span.textContent = 'null';
+                    contentSpan.appendChild(span);
+                }
+
+                line.appendChild(contentSpan);
+                line.dataset.searchText = (contentSpan.textContent || '').toLowerCase();
+                wrapper.appendChild(line);
+                treeNodeElements.push(line);
+
+                // Children container
+                const childrenContainer = document.createElement('div');
+                childrenContainer.className = 'tree-children';
+                if (isExpandable && !isEmpty) {
+                    const keys = Object.keys(value);
+                    keys.forEach((k) => {
+                        buildTreeNode(k, value[k], childrenContainer, depth + 1);
+                    });
+                    // Closing bracket
+                    const closeLine = document.createElement('div');
+                    closeLine.className = 'tree-line';
+                    closeLine.dataset.depth = depth;
+                    closeLine.dataset.key = '__close__';
+                    const closeToggle = document.createElement('span');
+                    closeToggle.className = 'tree-toggle leaf';
+                    closeLine.appendChild(closeToggle);
+                    const closeContent = document.createElement('span');
+                    closeContent.className = 'tree-bracket';
+                    closeContent.textContent = isArray ? ']' : '}';
+                    closeLine.appendChild(closeContent);
+                    closeLine.dataset.searchText = '';
+                    childrenContainer.appendChild(closeLine);
+                    treeNodeElements.push(closeLine);
+
+                    // Toggle functionality
+                    toggle.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const collapsed = childrenContainer.classList.toggle('collapsed');
+                        toggle.classList.toggle('collapsed', collapsed);
+                        toggle.textContent = collapsed ? '▶' : '▼';
+                    });
+                } else if (isExpandable && isEmpty) {
+                    childrenContainer.classList.add('collapsed');
+                }
+
+                wrapper.appendChild(childrenContainer);
+                parentEl.appendChild(wrapper);
+            }
+
+            function updateTreeBadge(obj) {
+                if (!obj) {
+                    $treeBadge.textContent = 'Empty';
+                    $treeBadge.className = 'badge';
+                    return;
+                }
+                const type = Array.isArray(obj) ? 'Array' : typeof obj === 'object' ? 'Object' : typeof obj;
+                let size = 0;
+                try { size = JSON.stringify(obj).length; } catch (e) {}
+                const sizeStr = size < 1024 ? `${size} B` : size < 1048576 ? `${(size/1024).toFixed(1)} KB` :
+                    `${(size/1048576).toFixed(1)} MB`;
+                $treeBadge.textContent = `${type} · ${sizeStr}`;
+                $treeBadge.className = 'badge';
+            }
+
+            function collapseAll() {
+                const allChildren = document.querySelectorAll('.tree-children');
+                const allToggles = document.querySelectorAll('.tree-toggle:not(.leaf)');
+                allChildren.forEach(c => c.classList.add('collapsed'));
+                allToggles.forEach(t => { t.classList.add('collapsed');
+                    t.textContent = '▶'; });
+                allTreeNodesExpanded = false;
+            }
+
+            function expandAll() {
+                const allChildren = document.querySelectorAll('.tree-children');
+                const allToggles = document.querySelectorAll('.tree-toggle:not(.leaf)');
+                allChildren.forEach(c => c.classList.remove('collapsed'));
+                allToggles.forEach(t => { t.classList.remove('collapsed');
+                    t.textContent = '▼'; });
+                allTreeNodesExpanded = true;
+            }
+
+            // ──────────────────────────────────────
+            // Search Engine
+            // ──────────────────────────────────────
+            function performSearch(query) {
+                // Clear previous highlights
+                document.querySelectorAll('.tree-line.search-match, .tree-line.search-current').forEach(el => {
+                    el.classList.remove('search-match', 'search-current');
+                });
+                searchResults = [];
+                searchIndex = -1;
+                if (!query || query.trim().length === 0) {
+                    $searchCount.textContent = '0/0';
+                    return;
+                }
+                const q = query.toLowerCase();
+                treeNodeElements.forEach((line, i) => {
+                    const text = line.dataset.searchText || '';
+                    if (text.includes(q)) {
+                        searchResults.push(line);
+                        line.classList.add('search-match');
+                    }
+                });
+                if (searchResults.length > 0) {
+                    searchIndex = 0;
+                    highlightCurrentSearch();
+                }
+                $searchCount.textContent = searchResults.length > 0 ? `${searchIndex + 1}/${searchResults.length}` :
+                    '0/0';
+            }
+
+            function highlightCurrentSearch() {
+                document.querySelectorAll('.tree-line.search-current').forEach(el => {
+                    el.classList.remove('search-current');
+                });
+                if (searchIndex >= 0 && searchIndex < searchResults.length) {
+                    const el = searchResults[searchIndex];
+                    el.classList.add('search-current');
+                    // Expand parents
+                    expandParents(el);
+                    // Scroll into view
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    $searchCount.textContent = `${searchIndex + 1}/${searchResults.length}`;
+                }
+            }
+
+            function expandParents(el) {
+                let current = el.closest('.tree-children');
+                while (current) {
+                    current.classList.remove('collapsed');
+                    const parentLine = current.closest('.tree-node')?.querySelector('.tree-toggle:not(.leaf)');
+                    if (parentLine) {
+                        parentLine.classList.remove('collapsed');
+                        parentLine.textContent = '▼';
+                    }
+                    current = current.parentElement?.closest('.tree-children');
+                }
+            }
+
+            function searchNext() {
+                if (searchResults.length === 0) return;
+                searchIndex = (searchIndex + 1) % searchResults.length;
+                highlightCurrentSearch();
+            }
+
+            function searchPrev() {
+                if (searchResults.length === 0) return;
+                searchIndex = (searchIndex - 1 + searchResults.length) % searchResults.length;
+                highlightCurrentSearch();
+            }
+
+            function clearSearch() {
+                document.querySelectorAll('.tree-line.search-match, .tree-line.search-current').forEach(el => {
+                    el.classList.remove('search-match', 'search-current');
+                });
+                searchResults = [];
+                searchIndex = -1;
+                $searchCount.textContent = '0/0';
+                $searchInput.value = '';
+                $searchContainer.classList.remove('active');
+            }
+
+            // ──────────────────────────────────────
+            // Main Update Pipeline
+            // ──────────────────────────────────────
+            function updateAll(source = 'editor') {
+                const raw = $editor.value;
+                const { data, error } = safeParse(raw);
+                parseError = error;
+                currentJSON = data;
+                if (data !== null) {
+                    currentJSONString = formatJSON(data, 2);
+                    renderTree(data, $treeContainer);
+                    $errorPanel.classList.remove('visible');
+                    $errorPanel.textContent = '';
+                    $editorBadge.textContent = '✓ Valid JSON';
+                    $editorBadge.className = 'badge';
+                    $editorBadge.style.color = 'var(--accent2)';
+                } else if (raw.trim() === '') {
+                    currentJSON = null;
+                    currentJSONString = '';
+                    $treeContainer.innerHTML =
+                        '<span style="color:var(--text3);">Enter JSON on the left to see the tree view...</span>';
+                    $errorPanel.classList.remove('visible');
+                    $editorBadge.textContent = 'JSON';
+                    $editorBadge.className = 'badge';
+                    $editorBadge.style.color = '';
+                } else {
+                    currentJSON = null;
+                    currentJSONString = '';
+                    $treeContainer.innerHTML =
+                        '<span style="color:var(--error);">⚠️ Invalid JSON — see error details below</span>';
+                    $errorPanel.classList.add('visible');
+                    $errorPanel.textContent = '❌ ' + (error || 'Unknown parse error');
+                    $editorBadge.textContent = '✕ Invalid';
+                    $editorBadge.className = 'badge error-badge';
+                    $editorBadge.style.color = '';
+                }
+                // Re-run search if active
+                if ($searchContainer.classList.contains('active') && $searchInput.value.trim()) {
+                    performSearch($searchInput.value.trim());
+                }
+            }
+
+            function debouncedUpdate() {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => updateAll(), DEBOUNCE_MS);
+            }
+
+            // ──────────────────────────────────────
+            // File Operations
+            // ──────────────────────────────────────
+            function handleFile(file) {
+                if (!file) return;
+                if (!file.name.endsWith('.json') && file.type !== 'application/json') {
+                    showToast('Please upload a .json file', 'error');
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    $editor.value = e.target.result;
+                    updateAll();
+                    showToast(`Loaded: ${file.name}`, 'success');
+                };
+                reader.onerror = () => showToast('Failed to read file', 'error');
+                reader.readAsText(file);
+            }
+
+            function downloadJSON(content, filename, mimeType = 'application/json') {
+                const blob = new Blob([content], { type: mimeType });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast(`Downloaded: ${filename}`, 'success');
+            }
+
+            // ──────────────────────────────────────
+            // API Fetch
+            // ──────────────────────────────────────
+            function fetchFromAPI() {
+                const url = prompt('🌐 Enter API URL to fetch JSON from:',
+                    'https://jsonplaceholder.typicode.com/posts/1');
+                if (!url || !url.trim()) return;
+                showToast('Fetching...', '');
+                fetch(url.trim(), {
+                        headers: { 'Accept': 'application/json' },
+                        mode: 'cors'
+                    })
+                    .then(res => {
+                        if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                        return res.text();
+                    })
+                    .then(text => {
+                        $editor.value = text;
+                        updateAll();
+                        showToast('✅ API response loaded', 'success');
+                    })
+                    .catch(err => {
+                        showToast('❌ Fetch failed: ' + err.message, 'error');
+                        console.error('API Fetch error:', err);
+                    });
+            }
+
+            // ──────────────────────────────────────
+            // Keyboard Shortcuts
+            // ──────────────────────────────────────
+            document.addEventListener('keydown', (e) => {
+                const ctrl = e.ctrlKey || e.metaKey;
+                const shift = e.shiftKey;
+
+                // Ctrl+F → Open search
+                if (ctrl && e.key === 'f') {
+                    e.preventDefault();
+                    $searchContainer.classList.add('active');
+                    $searchInput.focus();
+                    $searchInput.select();
+                }
+                // Ctrl+S → Download pretty JSON
+                if (ctrl && e.key === 's' && !shift) {
+                    e.preventDefault();
+                    if (currentJSON) {
+                        downloadJSON(formatJSON(currentJSON, 2), 'formatted.json');
+                    } else {
+                        showToast('No valid JSON to save', 'error');
+                    }
+                }
+                // Ctrl+Shift+F → Format
+                if (ctrl && shift && e.key === 'F') {
+                    e.preventDefault();
+                    if (currentJSON) {
+                        $editor.value = formatJSON(currentJSON, 2);
+                        updateAll();
+                        showToast('Formatted ✓', 'success');
+                    }
+                }
+                // Ctrl+Shift+M → Minify
+                if (ctrl && shift && e.key === 'M') {
+                    e.preventDefault();
+                    if (currentJSON) {
+                        $editor.value = minifyJSON(currentJSON);
+                        updateAll();
+                        showToast('Minified ✓', 'success');
+                    }
+                }
+                // Escape → Close search
+                if (e.key === 'Escape') {
+                    if ($searchContainer.classList.contains('active')) {
+                        clearSearch();
+                    }
+                }
+                // Enter in search → Next match
+                if (e.key === 'Enter' && document.activeElement === $searchInput) {
+                    e.preventDefault();
+                    if (e.shiftKey) searchPrev();
+                    else searchNext();
+                }
+            });
+
+            // ──────────────────────────────────────
+            // Event Listeners
+            // ──────────────────────────────────────
+            $editor.addEventListener('input', debouncedUpdate);
+            $editor.addEventListener('paste', () => {
+                // Immediate feedback on paste, then debounce for typing
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => updateAll(), 150);
+            });
+
+            // Search
+            $searchInput.addEventListener('input', () => {
+                performSearch($searchInput.value.trim());
+            });
+            document.getElementById('btn-search-next').addEventListener('click', searchNext);
+            document.getElementById('btn-search-prev').addEventListener('click', searchPrev);
+            document.getElementById('btn-search-close').addEventListener('click', clearSearch);
+
+            // Buttons
+            document.getElementById('btn-format').addEventListener('click', () => {
+                if (currentJSON) {
+                    $editor.value = formatJSON(currentJSON, 2);
+                    updateAll();
+                    showToast('Formatted ✓', 'success');
+                } else if ($editor.value.trim()) {
+                    // Try to fix then format
+                    const fixed = aiFixJSON($editor.value);
+                    $editor.value = fixed.result;
+                    updateAll();
+                    if (fixed.fixes.length > 0) {
+                        showToast('Fixed & formatted: ' + fixed.fixes.join(', '), 'success');
+                    }
+                }
+            });
+            document.getElementById('btn-minify').addEventListener('click', () => {
+                if (currentJSON) {
+                    $editor.value = minifyJSON(currentJSON);
+                    updateAll();
+                    showToast('Minified ✓', 'success');
+                } else {
+                    showToast('No valid JSON to minify', 'error');
+                }
+            });
+            document.getElementById('btn-fix').addEventListener('click', () => {
+                const raw = $editor.value;
+                if (!raw.trim()) {
+                    showToast('Nothing to fix', 'error');
+                    return;
+                }
+                const { result, fixes } = aiFixJSON(raw);
+                $editor.value = result;
+                updateAll();
+                if (fixes.length > 0) {
+                    showToast('🪄 Fixed: ' + fixes.join('; '), 'success');
+                } else if (!parseError) {
+                    showToast('JSON is already valid ✓', 'success');
+                } else {
+                    showToast('⚠️ Could not fully fix — manual review needed', 'error');
+                }
+            });
+            document.getElementById('btn-copy').addEventListener('click', () => {
+                const text = currentJSON ? formatJSON(currentJSON, 2) : $editor.value;
+                if (!text.trim()) {
+                    showToast('Nothing to copy', 'error');
+                    return;
+                }
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast('📋 Copied to clipboard!', 'success');
+                }).catch(() => {
+                    // Fallback
+                    $editor.select();
+                    document.execCommand('copy');
+                    showToast('📋 Copied (fallback)', 'success');
+                });
+            });
+            document.getElementById('btn-download-pretty').addEventListener('click', () => {
+                if (currentJSON) {
+                    downloadJSON(formatJSON(currentJSON, 2), 'formatted.json');
+                } else {
+                    showToast('No valid JSON to download', 'error');
+                }
+            });
+            document.getElementById('btn-download-min').addEventListener('click', () => {
+                if (currentJSON) {
+                    downloadJSON(minifyJSON(currentJSON), 'minified.json');
+                } else {
+                    showToast('No valid JSON to download', 'error');
+                }
+            });
+            document.getElementById('btn-upload').addEventListener('click', () => {
+                $fileInput.click();
+            });
+            $fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleFile(e.target.files[0]);
+                    $fileInput.value = '';
+                }
+            });
+            document.getElementById('btn-api').addEventListener('click', fetchFromAPI);
+            document.getElementById('btn-collapse-all').addEventListener('click', collapseAll);
+            document.getElementById('btn-expand-all').addEventListener('click', expandAll);
+            document.getElementById('btn-theme').addEventListener('click', () => {
+                isDarkMode = !isDarkMode;
+                document.documentElement.classList.toggle('light-mode', !isDarkMode);
+                document.getElementById('btn-theme').textContent = isDarkMode ? '🌓' : '☀️';
+                localStorage.setItem('json-devtool-theme', isDarkMode ? 'dark' : 'light');
+            });
+
+            // Drag & Drop
+            let dragCounter = 0;
+            document.addEventListener('dragenter', (e) => {
+                e.preventDefault();
+                dragCounter++;
+                if (dragCounter === 1) $dropOverlay.classList.add('active');
+            });
+            document.addEventListener('dragleave', (e) => {
+                dragCounter--;
+                if (dragCounter <= 0) {
+                    dragCounter = 0;
+                    $dropOverlay.classList.remove('active');
+                }
+            });
+            document.addEventListener('dragover', (e) => {
+                e.preventDefault();
+            });
+            document.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dragCounter = 0;
+                $dropOverlay.classList.remove('active');
+                const files = e.dataTransfer?.files;
+                if (files && files.length > 0) {
+                    handleFile(files[0]);
+                }
+            });
+
+            // Divider resizing
+            let isDragging = false;
+            $divider.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                $divider.classList.add('dragging');
+                document.body.style.cursor = 'col-resize';
+                document.body.style.userSelect = 'none';
+                e.preventDefault();
+            });
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                const rect = $main.getBoundingClientRect();
+                const isMobile = window.innerWidth <= 768;
+                if (isMobile) {
+                    // Vertical divider
+                    const pct = ((e.clientY - rect.top) / rect.height) * 100;
+                    const clamped = Math.max(15, Math.min(85, pct));
+                    document.getElementById('editor-panel').style.flex = `1 1 ${clamped}%`;
+                    document.getElementById('tree-panel').style.flex = `1 1 ${100 - clamped}%`;
+                } else {
+                    const pct = ((e.clientX - rect.left) / rect.width) * 100;
+                    const clamped = Math.max(20, Math.min(80, pct));
+                    document.getElementById('editor-panel').style.flex = `1 1 ${clamped}%`;
+                    document.getElementById('tree-panel').style.flex = `1 1 ${100 - clamped}%`;
+                }
+            });
+            document.addEventListener('mouseup', () => {
+                if (isDragging) {
+                    isDragging = false;
+                    $divider.classList.remove('dragging');
+                    document.body.style.cursor = '';
+                    document.body.style.userSelect = '';
+                }
+            });
+
+            // Handle window resize to reset mobile divider behavior
+            window.addEventListener('resize', () => {
+                if (window.innerWidth <= 768) {
+                    document.body.style.cursor = '';
+                }
+                // Re-render tree to fix any layout issues
+                if (currentJSON) {
+                    renderTree(currentJSON, $treeContainer);
+                    if ($searchContainer.classList.contains('active') && $searchInput.value.trim()) {
+                        performSearch($searchInput.value.trim());
+                    }
+                }
+            });
+
+            // ──────────────────────────────────────
+            // Initialization
+            // ──────────────────────────────────────
+            function init() {
+                // Load theme preference
+                const savedTheme = localStorage.getItem('json-devtool-theme');
+                if (savedTheme === 'light') {
+                    isDarkMode = false;
+                    document.documentElement.classList.add('light-mode');
+                    document.getElementById('btn-theme').textContent = '☀️';
+                }
+
+                // Load sample JSON
+                const sample = {
+                    "name": "JSON DevTool Pro",
+                    "version": "2.0.0",
+                    "description": "A production-grade JSON formatter & viewer",
+                    "features": [
+                        "Live Tree Viewer",
+                        "Auto Format & Minify",
+                        "AI JSON Fixer",
+                        "Search & Highlight",
+                        "File Upload & Download",
+                        "API Fetch Mode",
+                        "Dark/Light Mode"
+                    ],
+                    "stats": {
+                        "maxFileSize": "100k+ lines",
+                        "debounceMs": 300,
+                        "offlineReady": true,
+                        "dependencies": 0
+                    },
+                    "author": {
+                        "name": "DevTools Clone",
+                        "type": "open-source"
+                    },
+                    "settings": {
+                        "indentSpaces": 2,
+                        "autoFormat": true,
+                        "theme": isDarkMode ? "dark" : "light"
+                    },
+                    "sampleArray": [1, 2, 3, null, true, false, { "nested": "value" }],
+                    "emptyObject": {},
+                    "emptyArray": []
+                };
+                $editor.value = formatJSON(sample, 2);
+                updateAll();
+
+                // Focus editor after load
+                setTimeout(() => $editor.focus(), 100);
+            }
+
+            init();
+
+            // ──────────────────────────────────────
+            // Global API (for console use)
+            // ──────────────────────────────────────
+            window.JSONDevTool = {
+                getJSON: () => currentJSON,
+                getString: () => currentJSONString,
+                getError: () => parseError,
+                format: () => {
+                    if (currentJSON) {
+                        $editor.value = formatJSON(currentJSON, 2);
+                        updateAll();
+                    }
+                },
+                minify: () => {
+                    if (currentJSON) {
+                        $editor.value = minifyJSON(currentJSON);
+                        updateAll();
+                    }
+                },
+                fix: () => {
+                    const { result, fixes } = aiFixJSON($editor.value);
+                    $editor.value = result;
+                    updateAll();
+                    return fixes;
+                },
+                loadSample: () => {
+                    const sample = { "hello": "world", "numbers": [1, 2, 3],
+                        "nested": { "key": "value" } };
+                    $editor.value = formatJSON(sample, 2);
+                    updateAll();
+                },
+                collapseAll,
+                expandAll,
+                search: (q) => {
+                    $searchContainer.classList.add('active');
+                    $searchInput.value = q;
+                    $searchInput.focus();
+                    performSearch(q);
+                },
+                clearSearch,
+                toggleTheme: () => document.getElementById('btn-theme').click(),
+                getState: () => ({
+                    isValid: currentJSON !== null,
+                    parseError,
+                    darkMode: isDarkMode,
+                    searchActive: $searchContainer.classList.contains('active'),
+                    searchResultsCount: searchResults.length,
+                }),
+            };
+
+            console.log('%c🚀 JSON DevTool Pro Ready %c| %cType %cJSONDevTool%c for API access',
+                'font-size:1.1em;font-weight:bold;color:#58a6ff;',
+                '',
+                'color:#d2a8ff;',
+                'font-weight:bold;color:#ffa657;',
+                '');
+            console.log('%cFeatures: JSONDevTool.format() | .minify() | .fix() | .search("query") | .loadSample() | .toggleTheme() | .getState()',
+                'color:#8b949e;font-size:0.8em;');
+        })();
+    </script>
+</body>
+</html>
