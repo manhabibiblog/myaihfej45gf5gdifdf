@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0a0a0f">
+    <title>2048 Infinity 3D • Unstoppable</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #06060d;
+            --bg-panel: #0d0d1a;
+            --glass-bg: rgba(15, 15, 30, 0.7);
+            --glass-border: rgba(100, 200, 255, 0.25);
+            --neon-cyan: #00e5ff;
+            --neon-purple: #b44dff;
+            --neon-pink: #ff2d95;
+            --neon-gold: #ffd740;
+            --text-primary: #e0e0f0;
+            --text-secondary: #a0a0c0;
+            --glow-cyan: 0 0 20px rgba(0, 229, 255, 0.5);
+            --glow-purple: 0 0 20px rgba(180, 77, 255, 0.5);
+            --glow-pink: 0 0 20px rgba(255, 45, 149, 0.5);
+            --tile-2: #1a1a3a;
+            --tile-4: #1a2a4a;
+            --tile-8: #2a1a4a;
+            --tile-16: #3a1a5a;
+            --tile-32: #4a1a3a;
+            --tile-64: #5a0a3a;
+            --tile-128: #3a3a0a;
+            --tile-256: #4a4a0a;
+            --tile-512: #5a3a0a;
+            --tile-1024: #6a2a0a;
+            --tile-2048: #ff2d95;
+            --tile-special: #b44dff;
+            --font-main: 'Segoe UI', 'Inter', system-ui, sans-serif;
+            --font-mono: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+            --board-rotate-x: 8deg;
+            --board-rotate-y: -5deg;
+            --board-perspective: 900px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg-deep);
+            font-family: var(--font-main);
+            color: var(--text-primary);
+            min-height: 100vh;
+            min-height: 100dvh;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-font-smoothing: antialiased;
+            background-image:
+                radial-gradient(ellipse at 20% 20%, rgba(0, 180, 255, 0.06) 0%, transparent 55%),
+                radial-gradient(ellipse at 80% 70%, rgba(180, 77, 255, 0.05) 0%, transparent 55%),
+                radial-gradient(ellipse at 50% 50%, rgba(255, 45, 149, 0.03) 0%, transparent 60%);
+            background-attachment: fixed;
+        }
+
+        .bg-particles {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .bg-particle {
+            position: absolute;
+            border-radius: 50%;
+            animation: floatUp linear infinite;
+            opacity: 0;
+        }
+        @keyframes floatUp {
+            0% {
+                transform: translateY(105vh) scale(0);
+                opacity: 0;
+            }
+            5% {
+                opacity: 0.7;
+            }
+            90% {
+                opacity: 0.1;
+            }
+            100% {
+                transform: translateY(-10vh) scale(1.4);
+                opacity: 0;
+            }
+        }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 8px 32px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
+        }
+        .glass-panel:hover {
+            border-color: rgba(150, 220, 255, 0.4);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 12px 40px rgba(0, 0, 0, 0.5),
+                0 0 30px rgba(0, 200, 255, 0.08);
+        }
+
+        .neon-cyan {
+            color: var(--neon-cyan);
+            text-shadow: var(--glow-cyan);
+        }
+        .neon-purple {
+            color: var(--neon-purple);
+            text-shadow: var(--glow-purple);
+        }
+        .neon-pink {
+            color: var(--neon-pink);
+            text-shadow: var(--glow-pink);
+        }
+
+        .btn-neon {
+            background: rgba(20, 20, 40, 0.8);
+            border: 1px solid rgba(0, 200, 255, 0.4);
+            color: var(--neon-cyan);
+            border-radius: 25px;
+            padding: 8px 20px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            text-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-neon:hover {
+            background: rgba(0, 200, 255, 0.1);
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 25px rgba(0, 229, 255, 0.3), 0 0 50px rgba(0, 229, 255, 0.1);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+        .btn-neon:active {
+            transform: scale(0.96);
+            transition: transform 0.1s;
+        }
+        .btn-neon.purple {
+            border-color: rgba(180, 77, 255, 0.4);
+            color: var(--neon-purple);
+            text-shadow: 0 0 8px rgba(180, 77, 255, 0.4);
+        }
+        .btn-neon.purple:hover {
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 25px rgba(180, 77, 255, 0.3);
+        }
+        .btn-neon.pink {
+            border-color: rgba(255, 45, 149, 0.4);
+            color: var(--neon-pink);
+            text-shadow: 0 0 8px rgba(255, 45, 149, 0.4);
+        }
+        .btn-neon.pink:hover {
+            border-color: var(--neon-pink);
+            box-shadow: 0 0 25px rgba(255, 45, 149, 0.3);
+        }
+
+        .game-wrapper {
+            position: relative;
+            z-index: 1;
+            max-width: 520px;
+            margin: 0 auto;
+            padding: 10px 16px;
+        }
+
+        .board-3d-container {
+            perspective: var(--board-perspective);
+            perspective-origin: 50% 45%;
+            margin: 10px auto;
+            width: 100%;
+            max-width: 420px;
+            aspect-ratio: 1;
+        }
+        .board-3d {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform: rotateX(var(--board-rotate-x)) rotateY(var(--board-rotate-y));
+            transform-style: preserve-3d;
+            transition: transform 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
+            border-radius: 16px;
+            background: rgba(10, 10, 25, 0.85);
+            border: 2px solid rgba(100, 180, 255, 0.3);
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.6),
+                0 0 40px rgba(0, 180, 255, 0.1),
+                inset 0 0 60px rgba(0, 0, 0, 0.3);
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            gap: 8px;
+            padding: 12px;
+            cursor: grab;
+        }
+        .board-3d:active {
+            cursor: grabbing;
+        }
+        .board-3d.dragging {
+            transition: none;
+        }
+
+        .tile-cell {
+            position: relative;
+            border-radius: 10px;
+            background: rgba(30, 30, 55, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: clamp(18px, 4.5vw, 28px);
+            color: #fff;
+            transition: all 0.18s cubic-bezier(0.25, 0.1, 0.25, 1);
+            transform-style: preserve-3d;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        .tile-cell[data-value="2"] { background: var(--tile-2); color: #c0c0e0; }
+        .tile-cell[data-value="4"] { background: var(--tile-4); color: #b0d0f0; }
+        .tile-cell[data-value="8"] { background: var(--tile-8); color: #d0b0f0; box-shadow: 0 0 12px rgba(180, 77, 255, 0.3); }
+        .tile-cell[data-value="16"] { background: var(--tile-16); color: #f0b0d0; box-shadow: 0 0 14px rgba(255, 100, 180, 0.3); }
+        .tile-cell[data-value="32"] { background: var(--tile-32); color: #ffc0c0; box-shadow: 0 0 16px rgba(255, 80, 120, 0.35); }
+        .tile-cell[data-value="64"] { background: var(--tile-64); color: #ffd0a0; box-shadow: 0 0 18px rgba(255, 140, 40, 0.4); }
+        .tile-cell[data-value="128"] { background: var(--tile-128); color: #ffe080; box-shadow: 0 0 20px rgba(255, 200, 0, 0.4); font-size: clamp(16px, 4vw, 24px); }
+        .tile-cell[data-value="256"] { background: var(--tile-256); color: #fff080; box-shadow: 0 0 22px rgba(255, 220, 0, 0.45); font-size: clamp(16px, 4vw, 24px); }
+        .tile-cell[data-value="512"] { background: var(--tile-512); color: #ffd740; box-shadow: 0 0 25px rgba(255, 180, 0, 0.5); font-size: clamp(15px, 3.8vw, 22px); }
+        .tile-cell[data-value="1024"] { background: var(--tile-1024); color: #ffb030; box-shadow: 0 0 28px rgba(255, 140, 0, 0.55); font-size: clamp(14px, 3.5vw, 20px); }
+        .tile-cell[data-value="2048"] { background: var(--tile-2048); color: #fff; box-shadow: 0 0 35px rgba(255, 45, 149, 0.7), 0 0 60px rgba(255, 45, 149, 0.3); animation: pulse2048 1.5s ease-in-out infinite; font-size: clamp(13px, 3.2vw, 18px); }
+        .tile-cell.special-tile { border: 2px solid var(--neon-purple); box-shadow: 0 0 20px rgba(180, 77, 255, 0.6), inset 0 0 20px rgba(180, 77, 255, 0.15); animation: pulseSpecial 1s ease-in-out infinite; }
+        .tile-cell.merging { animation: mergePop 0.35s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+        .tile-cell.new-tile { animation: spawnTile 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+
+        @keyframes pulse2048 { 0%,100%{ box-shadow: 0 0 35px rgba(255, 45, 149, 0.7), 0 0 60px rgba(255, 45, 149, 0.3); } 50%{ box-shadow: 0 0 50px rgba(255, 45, 149, 0.9), 0 0 80px rgba(255, 45, 149, 0.5); } }
+        @keyframes pulseSpecial { 0%,100%{ box-shadow: 0 0 20px rgba(180, 77, 255, 0.6); } 50%{ box-shadow: 0 0 35px rgba(180, 77, 255, 0.9), 0 0 50px rgba(180, 77, 255, 0.4); } }
+        @keyframes mergePop { 0%{ transform: scale(1); } 40%{ transform: scale(1.25); } 100%{ transform: scale(1); } }
+        @keyframes spawnTile { 0%{ transform: scale(0); opacity:0; } 100%{ transform: scale(1); opacity:1; } }
+
+        .score-display {
+            font-family: var(--font-mono);
+            font-size: clamp(24px, 6vw, 36px);
+            font-weight: 900;
+            letter-spacing: 1px;
+        }
+        .combo-indicator {
+            position: absolute;
+            pointer-events: none;
+            font-weight: 900;
+            font-size: 20px;
+            color: var(--neon-gold);
+            text-shadow: 0 0 15px rgba(255, 215, 64, 0.8);
+            animation: comboFloat 1s ease-out forwards;
+            z-index: 10;
+        }
+        @keyframes comboFloat {
+            0%{ transform: translateY(0) scale(0.5); opacity:0; } 30%{ transform: translateY(-30px) scale(1.3); opacity:1; } 100%{ transform: translateY(-80px) scale(0.8); opacity:0; }
+        }
+
+        .mode-pill {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(20, 20, 40, 0.6);
+            color: #aaa;
+            transition: all 0.25s;
+            white-space: nowrap;
+        }
+        .mode-pill.active {
+            background: rgba(0, 200, 255, 0.15);
+            border-color: var(--neon-cyan);
+            color: var(--neon-cyan);
+            box-shadow: 0 0 15px rgba(0, 200, 255, 0.2);
+        }
+        .mode-pill:hover { border-color: rgba(255,255,255,0.5); color:#ddd; }
+
+        .overlay-panel {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            transition: opacity 0.3s;
+        }
+        .overlay-panel.hidden { opacity: 0; pointer-events: none; }
+        .overlay-content {
+            background: var(--bg-panel);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 24px;
+            max-width: 440px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+            position: relative;
+        }
+
+        /* Thinking emoji drop animation */
+        .thinking-emoji {
+            position: fixed;
+            top: -80px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 60px;
+            z-index: 200;
+            animation: thinkDrop 0.8s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+            pointer-events: none;
+        }
+        @keyframes thinkDrop {
+            0% { top: -80px; opacity:0; }
+            60% { top: 50%; opacity:1; }
+            80% { top: 45%; }
+            100% { top: 50%; opacity:1; }
+        }
+
+        /* Spin wheel simple */
+        .spin-result {
+            font-weight: 900;
+            font-size: 24px;
+            color: var(--neon-gold);
+            text-shadow: 0 0 20px gold;
+            animation: spinPop 0.4s ease-out;
+        }
+        @keyframes spinPop { 0%{ transform: scale(0); } 50%{ transform: scale(1.3); } 100%{ transform: scale(1); } }
+
+        ::-webkit-scrollbar { width:4px; }
+        ::-webkit-scrollbar-track { background:transparent; }
+        ::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.15); border-radius:4px; }
+
+        .toast-custom {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 200;
+            background: rgba(0,0,0,0.9);
+            border: 1px solid var(--neon-cyan);
+            color: #fff;
+            padding: 10px 22px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 14px;
+            animation: toastIn 0.4s ease-out;
+            box-shadow: 0 0 30px rgba(0,200,255,0.3);
+        }
+        @keyframes toastIn { from{ transform:translateX(-50%) translateY(30px); opacity:0; } to{ transform:translateX(-50%) translateY(0); opacity:1; } }
+
+        @media (max-width: 480px) {
+            .board-3d-container { max-width: 340px; }
+            .board-3d { gap:5px; padding:8px; border-radius:12px; }
+            .tile-cell { border-radius:7px; }
+            .btn-neon { padding:6px 14px; font-size:12px; }
+            .mode-pill { padding:4px 10px; font-size:10px; }
+        }
+        @media (max-width: 360px) {
+            .board-3d-container { max-width: 280px; }
+            .board-3d { gap:4px; padding:6px; }
+            .tile-cell { font-size:14px; border-radius:5px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-particles" id="bgParticles"></div>
+    <div id="toastContainer"></div>
+
+    <!-- Settings overlay -->
+    <div class="overlay-panel hidden" id="settingsOverlay">
+        <div class="overlay-content glass-panel">
+            <h3 class="neon-cyan mb-3">⚙ Settings</h3>
+            <div class="mb-3"><label class="form-label text-secondary">Theme</label>
+                <select class="form-select bg-dark text-light border-secondary" id="themeSelect">
+                    <option value="cyberpunk">🌆 Cyberpunk</option><option value="space">🚀 Space</option>
+                    <option value="neon">💜 Neon</option><option value="ice">❄ Ice World</option>
+                    <option value="lava">🌋 Lava Core</option><option value="matrix">💚 Matrix</option>
+                    <option value="galaxy">🌌 Galaxy</option><option value="retro">🕹 Retro Arcade</option>
+                </select></div>
+            <div class="mb-3"><label class="form-label text-secondary">Sound Volume</label>
+                <input type="range" class="form-range" id="volumeSlider" min="0" max="100" value="60"></div>
+            <div class="mb-3"><label class="form-label text-secondary">Board Rotation</label>
+                <input type="range" class="form-range" id="rotationSlider" min="0" max="20" value="8"></div>
+            <div class="form-check form-switch mb-3">
+                <input class="form-check-input" type="checkbox" id="particlesToggle" checked>
+                <label class="form-check-label text-secondary">Background Particles</label></div>
+            <div class="form-check form-switch mb-3">
+                <input class="form-check-input" type="checkbox" id="vibrationToggle" checked>
+                <label class="form-check-label text-secondary">Haptic Feedback</label></div>
+            <button class="btn-neon w-100 mt-2" onclick="toggleSettings()">Close</button>
+        </div>
+    </div>
+
+    <!-- Achievements overlay -->
+    <div class="overlay-panel hidden" id="achievementsOverlay">
+        <div class="overlay-content glass-panel">
+            <h3 class="neon-purple mb-3">🏆 Achievements</h3>
+            <div id="achievementsList" class="mb-3"></div>
+            <button class="btn-neon purple w-100 mt-2" onclick="toggleAchievements()">Close</button>
+        </div>
+    </div>
+
+    <!-- Game Over overlay (with thinking emoji) -->
+    <div class="overlay-panel hidden" id="gameOverOverlay">
+        <div class="overlay-content glass-panel text-center">
+            <div class="thinking-emoji" id="thinkingEmoji">🤔</div>
+            <h2 class="neon-pink mb-3" id="gameOverTitle">No Moves!</h2>
+            <p class="text-secondary" id="gameOverMsg"></p>
+            <p class="text-secondary">Your XP: <span id="xpDisplayGameOver"></span></p>
+            <div class="d-flex gap-2 justify-content-center flex-wrap mt-3">
+                <button class="btn-neon pink" onclick="game.continueAfterGameOver()" id="continueBtn">🔄 Continue (Cost: 50 XP)</button>
+                <button class="btn-neon" onclick="game.restartFromGameOver()">🔁 Restart</button>
+            </div>
+            <button class="btn-neon purple mt-2" onclick="closeGameOver()">✖ Close</button>
+        </div>
+    </div>
+
+    <!-- Game wrapper -->
+    <div class="game-wrapper">
+        <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
+            <h1 class="neon-cyan m-0" style="font-size:clamp(18px,5vw,26px);font-weight:900;letter-spacing:1px;">
+                2048<span class="neon-purple">∞</span><span class="neon-pink">3D</span>
+            </h1>
+            <div class="d-flex gap-2">
+                <button class="btn-neon btn-sm" onclick="toggleAchievements()" title="Achievements">🏆</button>
+                <button class="btn-neon btn-sm purple" onclick="toggleSettings()" title="Settings">⚙</button>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2 mb-2 flex-wrap">
+            <div class="glass-panel px-3 py-2 text-center flex-grow-1">
+                <small class="text-secondary">SCORE</small>
+                <div class="score-display neon-cyan" id="scoreDisplay">0</div>
+            </div>
+            <div class="glass-panel px-3 py-2 text-center flex-grow-1">
+                <small class="text-secondary">BEST</small>
+                <div class="score-display neon-purple" id="bestDisplay">0</div>
+            </div>
+            <div class="glass-panel px-3 py-2 text-center flex-grow-1">
+                <small class="text-secondary">COMBO</small>
+                <div class="score-display neon-pink" id="comboDisplay">x1</div>
+            </div>
+        </div>
+
+        <div class="d-flex gap-1 mb-2 flex-wrap overflow-auto pb-1" id="modeSelector">
+            <span class="mode-pill active" data-mode="classic">Classic</span>
+            <span class="mode-pill" data-mode="hardcore">Hardcore</span>
+            <span class="mode-pill" data-mode="zen">Zen</span>
+            <span class="mode-pill" data-mode="timeattack">Time Attack</span>
+            <span class="mode-pill" data-mode="chaos">Chaos</span>
+            <span class="mode-pill" data-mode="survival">Survival</span>
+            <span class="mode-pill" data-mode="battle">⚔ Battle</span>
+        </div>
+
+        <div class="board-3d-container" id="boardContainer">
+            <div class="board-3d" id="board3d"></div>
+        </div>
+
+        <div class="d-flex gap-2 mt-3 flex-wrap justify-content-center">
+            <button class="btn-neon" onclick="game.undo()">↩ Undo</button>
+            <button class="btn-neon purple" onclick="game.restart()">🔄 Restart</button>
+            <button class="btn-neon pink" id="btnPower" onclick="game.usePower()" disabled>⚡ Power</button>
+            <button class="btn-neon" onclick="game.togglePause()" id="btnPause">⏯ Pause</button>
+            <button class="btn-neon" id="btnSpin" onclick="game.spinWheel()" style="background: rgba(255,200,0,0.1); border-color: gold; color: gold;">🎰 Spin</button>
+        </div>
+        <div class="text-center mt-2">
+            <small class="text-secondary" id="modeDescription">Classic mode — Merge tiles to reach 2048</small>
+        </div>
+    </div>
+
+    <script>
+        // ==================== 2048 INFINITY 3D - UNSTOPPABLE EDITION ====================
+
+        const CONFIG = {
+            gridSize: 4,
+            winValue: 2048,
+            baseSpawnChance: 0.9,
+            comboTimeout: 2000,
+            maxComboMultiplier: 8,
+            powerChargePerMerge: 15,
+            powerMaxCharge: 100,
+            timeAttackDuration: 120,
+            survivalSpawnInterval: 8000,
+            chaosInterval: 5000,
+            hardcoreNoUndo: true,
+            continueCostXP: 50,
+            spinCostXP: 30,
+            spinFreeDaily: true,
+        };
+
+        const POWER_TILES = {
+            bomb: { name:'Bomb',icon:'💣',power:'clear_3x3',color:'#ff4444',effect:'explosion' },
+            lightning: { name:'Lightning',icon:'⚡',power:'clear_row',color:'#ffdd00',effect:'electric' },
+            freeze: { name:'Freeze',icon:'❄',power:'freeze_random',color:'#88ddff',effect:'ice' },
+            multiplier: { name:'Multiplier',icon:'✴',power:'multiply_score',color:'#ff8800',effect:'golden' },
+            portal: { name:'Portal',icon:'🌀',power:'swap_random',color:'#aa44ff',effect:'vortex' },
+            chaos: { name:'Chaos',icon:'🎲',power:'shuffle_board',color:'#ff00aa',effect:'glitch' },
+            magnetic: { name:'Magnetic',icon:'🧲',power:'pull_tiles',color:'#44ddff',effect:'attract' },
+            timewarp: { name:'Time Warp',icon:'⏳',power:'extra_move',color:'#ffaa00',effect:'rewind' },
+        };
+
+        const THEMES = {
+            cyberpunk:{ bg:'#06060d',panel:'#0d0d1a',cyan:'#00e5ff',purple:'#b44dff',pink:'#ff2d95',accent:'#00e5ff',boardBg:'rgba(10,10,25,0.85)',boardBorder:'rgba(100,180,255,0.3)' },
+            space:{ bg:'#020818',panel:'#0a1025',cyan:'#4db8ff',purple:'#7b68ee',pink:'#ff6b9d',accent:'#4db8ff',boardBg:'rgba(5,15,35,0.9)',boardBorder:'rgba(70,150,255,0.35)' },
+            neon:{ bg:'#0a0010',panel:'#150025',cyan:'#ff00ff',purple:'#cc00ff',pink:'#ff0088',accent:'#ff00ff',boardBg:'rgba(20,0,40,0.85)',boardBorder:'rgba(200,0,255,0.4)' },
+            ice:{ bg:'#051020',panel:'#0d1a2d',cyan:'#88eeff',purple:'#aaddff',pink:'#ffaacc',accent:'#88eeff',boardBg:'rgba(10,25,40,0.85)',boardBorder:'rgba(130,220,255,0.35)' },
+            lava:{ bg:'#1a0500',panel:'#2a0d05',cyan:'#ff6600',purple:'#ff3300',pink:'#ffcc00',accent:'#ff6600',boardBg:'rgba(30,10,5,0.9)',boardBorder:'rgba(255,100,30,0.4)' },
+            matrix:{ bg:'#000a00',panel:'#051505',cyan:'#00ff41',purple:'#00cc33',pink:'#88ff88',accent:'#00ff41',boardBg:'rgba(0,15,5,0.9)',boardBorder:'rgba(0,255,65,0.4)' },
+            galaxy:{ bg:'#050510',panel:'#0f0f25',cyan:'#c0a0ff',purple:'#8090ff',pink:'#ff90d0',accent:'#c0a0ff',boardBg:'rgba(15,10,30,0.85)',boardBorder:'rgba(180,150,255,0.35)' },
+            retro:{ bg:'#1a1a00',panel:'#2a2a0a',cyan:'#ffdd00',purple:'#ff8800',pink:'#ff4444',accent:'#ffdd00',boardBg:'rgba(25,25,5,0.9)',boardBorder:'rgba(255,200,0,0.4)' },
+        };
+
+        const ACHIEVEMENTS = [
+            { id:'first_merge',name:'First Merge',desc:'Make your first merge',icon:'🔗',xp:10,check:s=>s.totalMerges>=1 },
+            { id:'combo_king',name:'Combo King',desc:'Reach x4 combo',icon:'👑',xp:50,check:s=>s.maxCombo>=4 },
+            { id:'score_1k',name:'Point Collector',desc:'Score 1,000 points',icon:'⭐',xp:30,check:s=>s.bestScore>=1000 },
+            { id:'score_10k',name:'High Scorer',desc:'Score 10,000 points',icon:'🌟',xp:100,check:s=>s.bestScore>=10000 },
+            { id:'tile_256',name:'Tile 256',desc:'Create a 256 tile',icon:'🔷',xp:40,check:s=>s.maxTile>=256 },
+            { id:'tile_1024',name:'Tile 1024',desc:'Create a 1024 tile',icon:'💎',xp:80,check:s=>s.maxTile>=1024 },
+            { id:'tile_2048',name:'2048 Master',desc:'Win the game!',icon:'🏆',xp:200,check:s=>s.maxTile>=2048 },
+            { id:'no_undo',name:'No Mistakes',desc:'Complete a game without undo',icon:'🎯',xp:60,check:s=>s.noUndoWin },
+            { id:'speed_demon',name:'Speed Demon',desc:'Score 500 in Time Attack',icon:'⚡',xp:70,check:s=>s.timeAttackBest>=500 },
+            { id:'survivor',name:'Survivor',desc:'Survive 3 minutes in Survival',icon:'🛡',xp:90,check:s=>s.survivalBest>=180 },
+        ];
+
+        class AudioEngine {
+            constructor(){ this.ctx=null; this.enabled=true; this.volume=0.6; this.musicGain=null; this.initOnInteraction(); }
+            initOnInteraction(){
+                const init=()=>{ if(!this.ctx){ this.ctx=new(window.AudioContext||window.webkitAudioContext)(); this.musicGain=this.ctx.createGain(); this.musicGain.gain.value=0.08; this.musicGain.connect(this.ctx.destination); this.startAmbientDrone(); } if(this.ctx.state==='suspended') this.ctx.resume(); };
+                ['click','touchstart','keydown'].forEach(e=>document.addEventListener(e,init,{once:true}));
+            }
+            play(freq,type='sine',duration=0.15,vol=0.3){ if(!this.enabled||!this.ctx) return; try{ const t=this.ctx.currentTime; const osc=this.ctx.createOscillator(); const gain=this.ctx.createGain(); osc.type=type; osc.frequency.setValueAtTime(freq,t); osc.frequency.exponentialRampToValueAtTime(freq*0.3,t+duration); gain.gain.setValueAtTime(vol*this.volume,t); gain.gain.exponentialRampToValueAtTime(0.001,t+duration); osc.connect(gain); gain.connect(this.ctx.destination); osc.start(t); osc.stop(t+duration); }catch(e){} }
+            playMerge(value){ const base=200+(Math.log2(value||2)*80); this.play(base,'triangle',0.25,0.4); setTimeout(()=>this.play(base*1.5,'sine',0.2,0.3),100); }
+            playPower(){ this.play(600,'sawtooth',0.3,0.5); this.play(900,'square',0.2,0.3); }
+            playMove(){ this.play(120,'sine',0.08,0.15); }
+            playAchievement(){ this.play(523,'triangle',0.1,0.5); this.play(659,'triangle',0.1,0.5,100); this.play(784,'triangle',0.2,0.5,200); }
+            startAmbientDrone(){ if(!this.ctx||!this.musicGain) return; const drone=this.ctx.createOscillator(); drone.type='sine'; drone.frequency.value=55; const lfo=this.ctx.createOscillator(); lfo.type='sine'; lfo.frequency.value=0.15; const lfoGain=this.ctx.createGain(); lfoGain.gain.value=8; lfo.connect(lfoGain); lfoGain.connect(drone.frequency); drone.connect(this.musicGain); drone.start(); lfo.start(); this._drone=drone; this._lfo=lfo; }
+            setVolume(v){ this.volume=v/100; if(this.musicGain) this.musicGain.gain.value=0.08*this.volume; }
+        }
+        const audio = new AudioEngine();
+
+        class StorageEngine {
+            constructor(){ this.prefix='infinity2048_'; }
+            save(key,data){ try{ localStorage.setItem(this.prefix+key,JSON.stringify(data)); }catch(e){} }
+            load(key,fallback=null){ try{ const d=localStorage.getItem(this.prefix+key); return d?JSON.parse(d):fallback; }catch(e){ return fallback; } }
+            remove(key){ localStorage.removeItem(this.prefix+key); }
+        }
+        const storage = new StorageEngine();
+
+        class ParticleSystem {
+            constructor(containerId){ this.container=document.getElementById(containerId); this.enabled=true; this.particles=[]; this.initBackground(); }
+            initBackground(){
+                if(!this.container) return; this.container.innerHTML='';
+                const colors=['#00e5ff','#b44dff','#ff2d95','#ffd740','#ffffff','#88ddff'];
+                for(let i=0;i<35;i++){
+                    const p=document.createElement('div'); p.className='bg-particle';
+                    p.style.left=Math.random()*100+'%'; p.style.width=p.style.height=(Math.random()*3+1.5)+'px';
+                    p.style.backgroundColor=colors[Math.floor(Math.random()*colors.length)];
+                    p.style.animationDuration=(Math.random()*15+10)+'s'; p.style.animationDelay=(Math.random()*15)+'s';
+                    p.style.boxShadow=`0 0 ${Math.random()*6+2}px ${p.style.backgroundColor}`;
+                    this.container.appendChild(p); this.particles.push(p);
+                }
+            }
+            emit(x,y,count=15,color='#ffd740'){
+                if(!this.enabled) return;
+                for(let i=0;i<count;i++){
+                    const p=document.createElement('div'); p.style.cssText=`position:fixed;pointer-events:none;z-index:150;left:${x}px;top:${y}px;width:${Math.random()*6+2}px;height:${Math.random()*6+2}px;background:${color};border-radius:50%;box-shadow:0 0 ${Math.random()*8+4}px ${color};transition:all ${Math.random()*0.6+0.4}s cubic-bezier(0.25,0.1,0.25,1);opacity:1;`;
+                    document.body.appendChild(p);
+                    requestAnimationFrame(()=>{ p.style.transform=`translate(${(Math.random()-0.5)*120}px,${(Math.random()-0.5)*120}px) scale(0)`; p.style.opacity='0'; });
+                    setTimeout(()=>p.remove(),1000);
+                }
+            }
+        }
+        const particles = new ParticleSystem('bgParticles');
+
+        class GameState {
+            constructor(){
+                this.grid=[]; this.score=0; this.bestScore=0; this.combo=1; this.maxCombo=1;
+                this.lastMergeTime=0; this.totalMerges=0; this.maxTile=2; this.undoStack=[];
+                this.powerCharge=0; this.isPaused=false; this.isGameOver=false; this.hasWon=false;
+                this.mode='classic'; this.timeLeft=CONFIG.timeAttackDuration; this.timerInterval=null;
+                this.survivalTime=0; this.survivalInterval=null; this.chaosIntervalId=null;
+                this.noUndoWin=false; this.timeAttackBest=0; this.survivalBest=0;
+                this.achievements=storage.load('achievements',{}); this.xp=storage.load('xp',0);
+                this.level=storage.load('level',1); this.totalGamesPlayed=storage.load('totalGames',0);
+                this.bestScore=storage.load('bestScore',0); this.theme=storage.load('theme','cyberpunk');
+                this.lastSpinDate=storage.load('lastSpinDate','');
+            }
+            reset(){
+                this.grid=Array.from({length:CONFIG.gridSize},()=>Array(CONFIG.gridSize).fill(0));
+                this.score=0; this.combo=1; this.maxCombo=1; this.lastMergeTime=0; this.totalMerges=0;
+                this.maxTile=2; this.undoStack=[]; this.powerCharge=0; this.isPaused=false;
+                this.isGameOver=false; this.hasWon=false; this.noUndoWin=true;
+                this.clearTimers(); this.spawnInitial(); this.updateBestScore(); this.saveAll();
+            }
+            clearTimers(){
+                if(this.timerInterval) clearInterval(this.timerInterval);
+                if(this.survivalInterval) clearInterval(this.survivalInterval);
+                if(this.chaosIntervalId) clearInterval(this.chaosIntervalId);
+                this.timerInterval=null; this.survivalInterval=null; this.chaosIntervalId=null;
+            }
+            spawnInitial(){ this.addRandomTile(); this.addRandomTile(); this.undoStack=[]; }
+            addRandomTile(){
+                const empty=[]; for(let r=0;r<CONFIG.gridSize;r++) for(let c=0;c<CONFIG.gridSize;c++) if(this.grid[r][c]===0) empty.push({r,c});
+                if(empty.length===0) return null;
+                const pos=empty[Math.floor(Math.random()*empty.length)];
+                const value=Math.random()<CONFIG.baseSpawnChance?2:4;
+                this.grid[pos.r][pos.c]=value; return {...pos,value,isNew:true};
+            }
+            updateBestScore(){ if(this.score>this.bestScore){ this.bestScore=this.score; storage.save('bestScore',this.bestScore); } if(this.maxTile>(storage.load('maxTileEver',0))) storage.save('maxTileEver',this.maxTile); }
+            saveAll(){
+                storage.save('bestScore',this.bestScore); storage.save('achievements',this.achievements);
+                storage.save('xp',this.xp); storage.save('level',this.level); storage.save('totalGames',this.totalGamesPlayed);
+                storage.save('theme',this.theme); storage.save('maxTileEver',storage.load('maxTileEver',0));
+                storage.save('lastSpinDate',this.lastSpinDate);
+            }
+            addXP(amount){ this.xp+=amount; const newLevel=Math.floor(this.xp/200)+1; if(newLevel>this.level){ this.level=newLevel; showToast(`🎉 Level Up! Level ${this.level}`); } this.saveAll(); }
+            checkAchievements(){
+                const stats={ totalMerges:this.totalMerges,maxCombo:this.maxCombo,bestScore:this.bestScore,maxTile:this.maxTile,noUndoWin:this.noUndoWin&&this.maxTile>=2048,timeAttackBest:this.timeAttackBest,survivalBest:this.survivalBest };
+                let newUnlocks=false;
+                ACHIEVEMENTS.forEach(a=>{ if(!this.achievements[a.id]&&a.check(stats)){ this.achievements[a.id]=Date.now(); this.addXP(a.xp); showToast(`${a.icon} Achievement: ${a.name}! +${a.xp}XP`); audio.playAchievement(); newUnlocks=true; } });
+                if(newUnlocks) this.saveAll();
+            }
+        }
+
+        class GameEngine {
+            constructor(){
+                this.state=new GameState();
+                this.boardEl=document.getElementById('board3d'); this.scoreEl=document.getElementById('scoreDisplay');
+                this.bestEl=document.getElementById('bestDisplay'); this.comboEl=document.getElementById('comboDisplay');
+                this.btnPower=document.getElementById('btnPower'); this.btnPause=document.getElementById('btnPause');
+                this.modeDescEl=document.getElementById('modeDescription');
+                this.cells=[]; this.cellElements=[]; this.initBoard(); this.initControls();
+                this.applyTheme(); this.render(); this.updateUI(); this.state.reset(); this.render();
+            }
+            initBoard(){
+                this.boardEl.innerHTML=''; this.cellElements=[];
+                for(let r=0;r<CONFIG.gridSize;r++){ this.cellElements[r]=[]; for(let c=0;c<CONFIG.gridSize;c++){ const cell=document.createElement('div'); cell.className='tile-cell'; cell.dataset.row=r; cell.dataset.col=c; cell.textContent=''; this.boardEl.appendChild(cell); this.cellElements[r][c]=cell; } }
+            }
+            initControls(){
+                document.addEventListener('keydown',(e)=>{
+                    if(this.state.isPaused&&e.key!=='p'&&e.key!=='Escape') return;
+                    if(this.state.isGameOver) return;
+                    switch(e.key){
+                        case'ArrowUp':case'w':case'W':e.preventDefault(); this.move('up'); break;
+                        case'ArrowDown':case's':case'S':e.preventDefault(); this.move('down'); break;
+                        case'ArrowLeft':case'a':case'A':e.preventDefault(); this.move('left'); break;
+                        case'ArrowRight':case'd':case'D':e.preventDefault(); this.move('right'); break;
+                        case'p':case'P':case'Escape': this.togglePause(); break;
+                        case'z':case'Z': if(e.ctrlKey||e.metaKey){ e.preventDefault(); this.undo(); } break;
+                    }
+                });
+                let touchStartX=0,touchStartY=0;
+                this.boardEl.addEventListener('touchstart',(e)=>{ touchStartX=e.touches[0].clientX; touchStartY=e.touches[0].clientY; },{passive:true});
+                this.boardEl.addEventListener('touchend',(e)=>{
+                    if(this.state.isPaused||this.state.isGameOver) return;
+                    const dx=e.changedTouches[0].clientX-touchStartX, dy=e.changedTouches[0].clientY-touchStartY;
+                    if(Math.abs(dx)>Math.abs(dy)) this.move(dx>0?'right':'left'); else this.move(dy>0?'down':'up');
+                });
+                let mouseDown=false,mouseX=0,mouseY=0;
+                this.boardEl.addEventListener('mousedown',(e)=>{ mouseDown=true; mouseX=e.clientX; mouseY=e.clientY; this.boardEl.classList.add('dragging'); });
+                window.addEventListener('mousemove',(e)=>{ if(!mouseDown) return; const dx=e.clientX-mouseX, dy=e.clientY-mouseY; const rotY=Math.max(-15,Math.min(15,-dx*0.08)), rotX=Math.max(-15,Math.min(15,8+dy*0.08)); document.documentElement.style.setProperty('--board-rotate-x',rotX+'deg'); document.documentElement.style.setProperty('--board-rotate-y',rotY+'deg'); });
+                window.addEventListener('mouseup',()=>{ mouseDown=false; this.boardEl.classList.remove('dragging'); const baseRot=parseInt(document.getElementById('rotationSlider')?.value||8); document.documentElement.style.setProperty('--board-rotate-x',baseRot+'deg'); document.documentElement.style.setProperty('--board-rotate-y','-5deg'); });
+                document.getElementById('modeSelector').addEventListener('click',(e)=>{ const pill=e.target.closest('.mode-pill'); if(!pill) return; document.querySelectorAll('.mode-pill').forEach(p=>p.classList.remove('active')); pill.classList.add('active'); this.setMode(pill.dataset.mode); });
+                document.getElementById('themeSelect').addEventListener('change',(e)=>{ this.state.theme=e.target.value; this.applyTheme(); this.state.saveAll(); });
+                document.getElementById('volumeSlider').addEventListener('input',(e)=>{ audio.setVolume(parseInt(e.target.value)); });
+                document.getElementById('rotationSlider').addEventListener('input',(e)=>{ document.documentElement.style.setProperty('--board-rotate-x',e.target.value+'deg'); });
+                document.getElementById('particlesToggle').addEventListener('change',(e)=>{ particles.enabled=e.target.checked; document.getElementById('bgParticles').style.display=e.target.checked?'':'none'; });
+            }
+            setMode(mode){
+                this.state.clearTimers(); this.state.mode=mode; this.state.reset(); this.state.noUndoWin=true;
+                const descs={ classic:'Classic mode — Merge tiles to reach 2048', hardcore:'Hardcore — No undo, tougher spawns', zen:'Zen — Infinite relaxing play, auto-shuffle when stuck', timeattack:'Time Attack — 2 minutes to score!', chaos:'Chaos — Random effects every few seconds', survival:'Survival — Board auto-spawns tiles', battle:'⚔ Battle — AI opponent (coming soon)' };
+                this.modeDescEl.textContent=descs[mode]||descs['classic'];
+                if(mode==='timeattack'){ this.state.timeLeft=CONFIG.timeAttackDuration; this.state.timerInterval=setInterval(()=>{ if(!this.state.isPaused&&!this.state.isGameOver){ this.state.timeLeft--; this.updateUI(); if(this.state.timeLeft<=0){ this.gameOver('Time\'s up!'); this.state.timeAttackBest=Math.max(this.state.timeAttackBest,this.state.score); this.state.checkAchievements(); } } },1000); }
+                if(mode==='survival'){ this.state.survivalTime=0; this.state.survivalInterval=setInterval(()=>{ if(!this.state.isPaused&&!this.state.isGameOver){ this.state.survivalTime++; if(this.state.survivalTime%8===0){ const sp=this.state.addRandomTile(); if(sp) this.render(); } this.updateUI(); } },1000); }
+                if(mode==='chaos'){ this.state.chaosIntervalId=setInterval(()=>{ if(!this.state.isPaused&&!this.state.isGameOver) this.triggerRandomChaos(); },CONFIG.chaosInterval); }
+                if(mode==='hardcore') this.state.undoStack=[];
+                this.render(); this.updateUI();
+            }
+            triggerRandomChaos(){
+                const effects=['shuffle_board','clear_random','spawn_power','double_random'];
+                const effect=effects[Math.floor(Math.random()*effects.length)];
+                switch(effect){
+                    case'shuffle_board': this.shuffleBoard(); break;
+                    case'clear_random': const r=Math.floor(Math.random()*CONFIG.gridSize),c=Math.floor(Math.random()*CONFIG.gridSize); if(this.state.grid[r][c]>0){ this.state.grid[r][c]=0; particles.emit(window.innerWidth/2,window.innerHeight/2,20,'#ff00aa'); } break;
+                    case'spawn_power': const empty=[]; for(let rr=0;rr<CONFIG.gridSize;rr++) for(let cc=0;cc<CONFIG.gridSize;cc++) if(this.state.grid[rr][cc]===0) empty.push({r:rr,c:cc}); if(empty.length>0){ const pos=empty[Math.floor(Math.random()*empty.length)]; this.state.grid[pos.r][pos.c]=-1; } break;
+                    case'double_random': for(let rr=0;rr<CONFIG.gridSize;rr++) for(let cc=0;cc<CONFIG.gridSize;cc++) if(this.state.grid[rr][cc]>0&&this.state.grid[rr][cc]<512&&Math.random()<0.3) this.state.grid[rr][cc]*=2; break;
+                }
+                this.render();
+            }
+            shuffleBoard(){
+                const flat=this.state.grid.flat(); for(let i=flat.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [flat[i],flat[j]]=[flat[j],flat[i]]; }
+                for(let r=0;r<CONFIG.gridSize;r++) for(let c=0;c<CONFIG.gridSize;c++) this.state.grid[r][c]=flat[r*CONFIG.gridSize+c];
+            }
+            move(direction){
+                if(this.state.isPaused||this.state.isGameOver) return;
+                if(this.state.mode==='hardcore'&&this.state.undoStack.length>0) this.state.undoStack=[];
+                const snapshot=this.state.grid.map(row=>[...row]), oldScore=this.state.score;
+                let moved=false, mergeCount=0; const mergePositions=[];
+                const vectors={ up:{dr:-1,dc:0},down:{dr:1,dc:0},left:{dr:0,dc:-1},right:{dr:0,dc:1} };
+                const vec=vectors[direction]; const traverse=this.getTraversalOrder(direction);
+                for(const {r,c} of traverse){
+                    if(this.state.grid[r][c]===0) continue;
+                    let cr=r,cc=c; const value=this.state.grid[r][c]; this.state.grid[r][c]=0;
+                    while(true){
+                        const nr=cr+vec.dr, nc=cc+vec.dc;
+                        if(nr<0||nr>=CONFIG.gridSize||nc<0||nc>=CONFIG.gridSize) break;
+                        if(this.state.grid[nr][nc]===0){ cr=nr; cc=nc; continue; }
+                        if(this.state.grid[nr][nc]===value){ this.state.grid[nr][nc]=value*2; this.state.score+=value*2*this.state.combo; mergeCount++; mergePositions.push({r:nr,c:nc,value:value*2}); this.state.maxTile=Math.max(this.state.maxTile,value*2); this.state.totalMerges++; moved=true; cr=-1; break; }
+                        break;
+                    }
+                    if(cr>=0){ this.state.grid[cr][cc]=value; if(cr!==r||cc!==c) moved=true; }
+                }
+                if(!moved) return;
+                const now=Date.now();
+                if(mergeCount>0){
+                    if(now-this.state.lastMergeTime<CONFIG.comboTimeout) this.state.combo=Math.min(this.state.combo+1,CONFIG.maxComboMultiplier);
+                    else this.state.combo=Math.min(1+mergeCount,CONFIG.maxComboMultiplier);
+                    this.state.lastMergeTime=now; this.state.maxCombo=Math.max(this.state.maxCombo,this.state.combo);
+                    this.state.powerCharge=Math.min(CONFIG.powerMaxCharge,this.state.powerCharge+CONFIG.powerChargePerMerge*mergeCount);
+                    mergePositions.forEach(mp=>{ audio.playMerge(mp.value); const el=this.cellElements[mp.r]?.[mp.c]; if(el){ const rect=el.getBoundingClientRect(); particles.emit(rect.left+rect.width/2,rect.top+rect.height/2,18,this.getTileColor(mp.value)); } });
+                } else audio.playMove();
+                this.state.undoStack.push({grid:snapshot,score:oldScore,combo:this.state.combo-(mergeCount>0?1:0),maxTile:this.state.maxTile});
+                if(this.state.undoStack.length>20) this.state.undoStack.shift();
+                const spawned=this.state.addRandomTile();
+                this.state.updateBestScore(); this.state.checkAchievements();
+                this.render(); this.updateUI();
+                if(this.state.maxTile>=CONFIG.winValue&&!this.state.hasWon&&this.state.mode==='classic'){ this.state.hasWon=true; showToast('🎉 You reached 2048! Keep going!'); }
+                if(!this.canMove()){
+                    if(this.state.mode==='zen'){ this.shuffleBoard(); showToast('🌀 Board shuffled — keep relaxing'); this.render(); } else { this.gameOver('No more moves!'); }
+                }
+                if(this.state.maxTile>=128&&Math.random()<0.08&&spawned){ const powerKeys=Object.keys(POWER_TILES); const pk=powerKeys[Math.floor(Math.random()*powerKeys.length)]; this.state.grid[spawned.r][spawned.c]=-1; this.state._powerType=pk; }
+            }
+            getTraversalOrder(dir){
+                const order=[]; for(let r=0;r<CONFIG.gridSize;r++) for(let c=0;c<CONFIG.gridSize;c++) order.push({r,c});
+                if(dir==='down') order.sort((a,b)=>b.r-a.r); if(dir==='right') order.sort((a,b)=>b.c-a.c);
+                return order;
+            }
+            canMove(){
+                for(let r=0;r<CONFIG.gridSize;r++) for(let c=0;c<CONFIG.gridSize;c++){ if(this.state.grid[r][c]===0) return true; if(r+1<CONFIG.gridSize&&this.state.grid[r][c]===this.state.grid[r+1][c]) return true; if(c+1<CONFIG.gridSize&&this.state.grid[r][c]===this.state.grid[r][c+1]) return true; }
+                return false;
+            }
+            gameOver(msg){
+                this.state.isGameOver=true; this.state.clearTimers(); this.state.totalGamesPlayed++;
+                this.state.updateBestScore(); this.state.checkAchievements(); this.state.saveAll();
+                this.updateUI();
+                // Show overlay with thinking emoji
+                document.getElementById('gameOverOverlay').classList.remove('hidden');
+                document.getElementById('gameOverMsg').textContent=msg;
+                document.getElementById('xpDisplayGameOver').textContent=this.state.xp;
+                const continueBtn=document.getElementById('continueBtn');
+                if(this.state.xp>=CONFIG.continueCostXP){ continueBtn.disabled=false; continueBtn.textContent=`🔄 Continue (Cost: ${CONFIG.continueCostXP} XP)`; } else { continueBtn.disabled=true; continueBtn.textContent=`🔒 Need ${CONFIG.continueCostXP} XP`; }
+                // Trigger thinking emoji animation
+                const emoji=document.getElementById('thinkingEmoji');
+                emoji.style.animation='none'; emoji.offsetHeight; emoji.style.animation='thinkDrop 0.8s cubic-bezier(0.22,0.61,0.36,1) forwards';
+            }
+            continueAfterGameOver(){
+                if(this.state.xp<CONFIG.continueCostXP) return;
+                this.state.xp-=CONFIG.continueCostXP; this.state.isGameOver=false; this.state.hasWon=false;
+                this.shuffleBoard(); this.state.addRandomTile(); this.state.addRandomTile();
+                this.state.saveAll(); this.render(); this.updateUI();
+                document.getElementById('gameOverOverlay').classList.add('hidden');
+                showToast('🔄 Continued! Board shuffled. -50 XP');
+            }
+            restartFromGameOver(){
+                document.getElementById('gameOverOverlay').classList.add('hidden');
+                this.restart();
+            }
+            restart(){
+                this.state.clearTimers(); this.state.totalGamesPlayed++; this.state.saveAll();
+                this.state.reset();
+                if(this.state.mode==='timeattack'){ this.state.timeLeft=CONFIG.timeAttackDuration; this.state.timerInterval=setInterval(()=>{ if(!this.state.isPaused&&!this.state.isGameOver){ this.state.timeLeft--; this.updateUI(); if(this.state.timeLeft<=0) this.gameOver('Time\'s up!'); } },1000); }
+                if(this.state.mode==='survival'){ this.state.survivalTime=0; this.state.survivalInterval=setInterval(()=>{ if(!this.state.isPaused&&!this.state.isGameOver){ this.state.survivalTime++; if(this.state.survivalTime%8===0){ const sp=this.state.addRandomTile(); if(sp) this.render(); } this.updateUI(); } },1000); }
+                this.render(); this.updateUI();
+            }
+            undo(){ /* ... same ... */ if(this.state.isGameOver||this.state.isPaused) return; if(this.state.mode==='hardcore'){ showToast('No undo in Hardcore!'); return; } if(this.state.undoStack.length===0){ showToast('Nothing to undo'); return; } const prev=this.state.undoStack.pop(); this.state.grid=prev.grid; this.state.score=prev.score; this.state.combo=prev.combo; this.state.maxTile=prev.maxTile; this.state.noUndoWin=false; this.state.updateBestScore(); this.render(); this.updateUI(); showToast('↩ Undo!'); }
+            usePower(){ if(this.state.powerCharge<CONFIG.powerMaxCharge||this.state.isGameOver||this.state.isPaused) return; this.state.powerCharge=0; audio.playPower(); const filled=[]; for(let r=0;r<CONFIG.gridSize;r++) for(let c=0;c<CONFIG.gridSize;c++) if(this.state.grid[r][c]>0) filled.push({r,c}); if(filled.length>=2){ const t1=filled.splice(Math.floor(Math.random()*filled.length),1)[0]; const t2=filled.splice(Math.floor(Math.random()*filled.length),1)[0]; this.state.grid[t1.r][t1.c]=0; this.state.grid[t2.r][t2.c]=0; } this.render(); this.updateUI(); showToast('⚡ Power used!'); }
+            togglePause(){ this.state.isPaused=!this.state.isPaused; this.btnPause.textContent=this.state.isPaused?'▶ Play':'⏯ Pause'; this.boardEl.style.opacity=this.state.isPaused?'0.5':'1'; }
+            spinWheel(){
+                if(this.state.isGameOver) return;
+                const today=new Date().toDateString();
+                const isFree=this.state.lastSpinDate!==today;
+                if(!isFree && this.state.xp<CONFIG.spinCostXP){ showToast(`Need ${CONFIG.spinCostXP} XP for extra spin`); return; }
+                if(!isFree){ this.state.xp-=CONFIG.spinCostXP; }
+                this.state.lastSpinDate=today; this.state.saveAll();
+                const rewards=[ {msg:'+50 Score',action:()=>{ this.state.score+=50; }}, {msg:'Clear 2 tiles',action:()=>{ const filled=[]; for(let r=0;r<CONFIG.gridSize;r++) for(let c=0;c<CONFIG.gridSize;c++) if(this.state.grid[r][c]>0) filled.push({r,c}); if(filled.length>=2){ const t1=filled.splice(Math.floor(Math.random()*filled.length),1)[0]; const t2=filled.splice(Math.floor(Math.random()*filled.length),1)[0]; this.state.grid[t1.r][t1.c]=0; this.state.grid[t2.r][t2.c]=0; } }}, {msg:'Double Combo for 10s',action:()=>{ const old=this.state.combo; this.state.combo=Math.min(this.state.combo*2,16); setTimeout(()=>{ this.state.combo=old; },10000); }}, {msg:'+20 XP',action:()=>{ this.state.addXP(20); }}, {msg:'Spawn Power Tile',action:()=>{ const empty=[]; for(let r=0;r<CONFIG.gridSize;r++) for(let c=0;c<CONFIG.gridSize;c++) if(this.state.grid[r][c]===0) empty.push({r,c}); if(empty.length>0){ const pos=empty[Math.floor(Math.random()*empty.length)]; this.state.grid[pos.r][pos.c]=-1; } }}, ];
+                const reward=rewards[Math.floor(Math.random()*rewards.length)];
+                reward.action(); this.render(); this.updateUI();
+                showToast(`🎰 Spin: ${reward.msg} ${isFree?'(free daily)':`(-${CONFIG.spinCostXP} XP)`}`);
+            }
+            getTileColor(v){ if(v<0) return '#b44dff'; const colors={2:'#c0c0e0',4:'#b0d0f0',8:'#d0b0f0',16:'#f0b0d0',32:'#ffc0c0',64:'#ffd0a0',128:'#ffe080',256:'#fff080',512:'#ffd740',1024:'#ffb030',2048:'#ff2d95'}; return colors[v]||'#ff2d95'; }
+            render(){
+                for(let r=0;r<CONFIG.gridSize;r++) for(let c=0;c<CONFIG.gridSize;c++){ const cell=this.cellElements[r][c]; const val=this.state.grid[r][c]; cell.textContent=val>0?val:''; cell.dataset.value=val>0?val:''; if(val<0){ cell.textContent='?'; cell.dataset.value='special'; cell.classList.add('special-tile'); } else cell.classList.remove('special-tile'); cell.classList.remove('merging','new-tile'); }
+                this.btnPower.disabled=this.state.powerCharge<CONFIG.powerMaxCharge; this.btnPower.textContent=`⚡ Power (${Math.floor(this.state.powerCharge)}%)`;
+            }
+            updateUI(){
+                this.scoreEl.textContent=this.state.score.toLocaleString(); this.bestEl.textContent=this.state.bestScore.toLocaleString(); this.comboEl.textContent='x'+this.state.combo;
+                if(this.state.mode==='timeattack') this.modeDescEl.textContent=`⏱ Time Attack — ${Math.floor(this.state.timeLeft/60)}:${(this.state.timeLeft%60).toString().padStart(2,'0')} | Score: ${this.state.score}`;
+                if(this.state.mode==='survival') this.modeDescEl.textContent=`🛡 Survival — ${Math.floor(this.state.survivalTime/60)}:${(this.state.survivalTime%60).toString().padStart(2,'0')} | Score: ${this.state.score}`;
+                if(this.state.isGameOver) this.modeDescEl.textContent+=' | GAME OVER';
+                document.getElementById('volumeSlider').value=Math.round(audio.volume*100);
+            }
+            applyTheme(){
+                const theme=THEMES[this.state.theme]||THEMES['cyberpunk'];
+                document.documentElement.style.setProperty('--bg-deep',theme.bg); document.documentElement.style.setProperty('--bg-panel',theme.panel);
+                document.documentElement.style.setProperty('--neon-cyan',theme.cyan); document.documentElement.style.setProperty('--neon-purple',theme.purple);
+                document.documentElement.style.setProperty('--neon-pink',theme.pink); document.documentElement.style.setProperty('--glass-border',theme.boardBorder);
+                this.boardEl.style.background=theme.boardBg; this.boardEl.style.borderColor=theme.boardBorder;
+                document.getElementById('themeSelect').value=this.state.theme;
+            }
+        }
+
+        function showToast(msg){ const container=document.getElementById('toastContainer'); const toast=document.createElement('div'); toast.className='toast-custom'; toast.textContent=msg; container.appendChild(toast); setTimeout(()=>{ toast.style.opacity='0'; toast.style.transition='opacity 0.3s'; setTimeout(()=>toast.remove(),300); },2000); }
+        function toggleSettings(){ document.getElementById('settingsOverlay').classList.toggle('hidden'); }
+        function toggleAchievements(){ const overlay=document.getElementById('achievementsOverlay'); const list=document.getElementById('achievementsList'); overlay.classList.toggle('hidden'); if(!overlay.classList.contains('hidden')){ list.innerHTML=ACHIEVEMENTS.map(a=>{ const unlocked=game.state.achievements[a.id]; return `<div class="d-flex align-items-center gap-2 mb-2 p-2 rounded" style="background:${unlocked?'rgba(0,200,255,0.1)':'rgba(255,255,255,0.03)'};border:1px solid ${unlocked?'rgba(0,200,255,0.3)':'rgba(255,255,255,0.08)'}"><span style="font-size:24px;">${unlocked?a.icon:'🔒'}</span><div><strong style="color:${unlocked?'var(--neon-cyan)':'#666'}">${a.name}</strong><small class="d-block text-secondary">${a.desc} — ${a.xp}XP</small>${unlocked?`<small class="text-success">Unlocked ${new Date(unlocked).toLocaleDateString()}</small>`:''}</div></div>`; }).join(''); } }
+        function closeGameOver(){ document.getElementById('gameOverOverlay').classList.add('hidden'); }
+
+        const game = new GameEngine();
+        game.state.reset(); game.render(); game.updateUI();
+        const savedTheme=storage.load('theme','cyberpunk'); game.state.theme=savedTheme; game.applyTheme();
+        document.getElementById('themeSelect').value=savedTheme;
+        document.getElementById('volumeSlider').value=Math.round(audio.volume*100);
+        document.getElementById('settingsOverlay').addEventListener('click',function(e){ if(e.target===this) toggleSettings(); });
+        document.getElementById('achievementsOverlay').addEventListener('click',function(e){ if(e.target===this) toggleAchievements(); });
+        document.getElementById('gameOverOverlay').addEventListener('click',function(e){ if(e.target===this) closeGameOver(); });
+        console.log('🚀 2048 Infinity 3D Unstoppable Edition ready!');
+    </script>
+</body>
+</html>
